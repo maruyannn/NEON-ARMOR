@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEON ARMOR - GB EDITION</title>
+    <title>NEON ARMOR - ADAPTATIVE EDITION</title>
     <style>
         :root {
             --bg-color: #0d0d12; --accent-color: #00ffcc; --danger-color: #ff0055;
@@ -11,133 +11,106 @@
         }
         body, html {
             margin: 0; padding: 0; width: 100vw; height: 100vh;
-            background-color: #8b8b8b; color: var(--text-color);
+            background-color: var(--bg-color); color: var(--text-color);
             font-family: 'Courier New', Courier, monospace; overflow: hidden;
             user-select: none; touch-action: none;
         }
 
         #appWrapper {
             display: flex;
-            flex-direction: column;
             width: 100%;
             height: 100%;
         }
 
-        /* --- PANTALLA SUPERIOR --- */
+        body.pc-mode #appWrapper { flex-direction: row; justify-content: center; align-items: center; gap: 20px; background-color: var(--bg-color); }
+        body.mobile-mode #appWrapper { flex-direction: column; background-color: #8b8b8b; }
+
         #topScreen {
-            flex: 0 0 50vh;
-            width: 100%;
-            background: #000;
             position: relative;
-            border-bottom: 4px solid #333;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 10;
         }
-        #gameContainer {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-        canvas { 
-            display: block; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain;
-        }
 
-        /* --- UI LAYER ADAPTADO --- */
+        body.pc-mode #topScreen { flex: 0 0 auto; width: 1024px; height: 768px; max-width: 100%; max-height: 100%; box-shadow: 0 0 20px rgba(0,255,204,0.2); }
+        body.mobile-mode #topScreen { flex: 0 0 50vh; width: 100%; border-bottom: 4px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+
+        #gameContainer { position: relative; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; object-fit: contain; }
+
         #uiLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; justify-content: center; align-items: center; z-index: 20; }
-        .screen { background: var(--ui-bg); padding: 15px; border: 2px solid var(--accent-color); border-radius: 0; text-align: center; pointer-events: auto; display: none; width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        
+        body.pc-mode .screen { background: var(--ui-bg); padding: 30px; border: 2px solid var(--accent-color); border-radius: 8px; text-align: center; pointer-events: auto; box-shadow: 0 0 15px var(--accent-color); display: none; max-width: 800px; max-height: 90%; overflow-y: auto; }
+        body.mobile-mode .screen { background: var(--ui-bg); padding: 15px; border: 2px solid var(--accent-color); border-radius: 0; text-align: center; pointer-events: auto; display: none; width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        
         .screen.active { display: block; }
         
-        h1 { margin-top: 0; font-size: 1.5em; color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color); }
-        h2 { font-size: 1.2em; color: var(--danger-color); margin-top: 0; }
-        h3 { font-size: 1em; color: var(--gold-color); margin-bottom: 5px; }
-        p { margin: 5px 0; font-size: 0.9em; }
+        h1 { margin-top: 0; color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color); }
+        h2 { color: var(--danger-color); margin-top: 0; }
+        h3 { color: var(--gold-color); margin-bottom: 5px; }
+        p { margin: 5px 0; }
         
-        input { padding: 8px; font-size: 1em; font-family: inherit; background: #000; border: 1px solid var(--accent-color); color: #fff; width: 90%; margin-bottom: 10px; text-align: center; box-sizing: border-box; }
-        button { background: var(--accent-color); color: #000; border: none; padding: 10px 15px; font-size: 0.9em; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: inherit; margin: 4px; }
+        body.pc-mode h1 { font-size: 2em; }
+        body.mobile-mode h1 { font-size: 1.5em; }
+        body.mobile-mode h2 { font-size: 1.2em; }
+        body.mobile-mode h3 { font-size: 1em; }
+        body.mobile-mode p { font-size: 0.9em; }
+
+        input { padding: 10px; font-size: 1em; font-family: inherit; background: #000; border: 1px solid var(--accent-color); color: #fff; width: 80%; margin-bottom: 15px; text-align: center; box-sizing: border-box; }
+        button { background: var(--accent-color); color: #000; border: none; padding: 12px 24px; font-size: 1em; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: inherit; margin: 5px; transition: 0.2s; }
+        button:hover { background: #fff; box-shadow: 0 0 15px #fff; }
         button.danger { background: var(--danger-color); color: #fff; }
 
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .stats-bar { display: flex; justify-content: space-around; background: #222; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; flex-wrap: wrap; gap: 5px; font-size: 0.8em; }
+        body.mobile-mode button { padding: 10px 15px; font-size: 0.9em; margin: 4px; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stats-bar { display: flex; justify-content: space-around; background: #222; padding: 10px; border-radius: 4px; margin-bottom: 20px; font-weight: bold; flex-wrap: wrap; gap: 10px; }
         .stats-bar span { color: var(--accent-color); }
 
-        /* Tienda */
-        .store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; text-align: left; }
-        .weapon-card { border: 2px solid #555; padding: 10px; background: #111; }
+        body.mobile-mode .menu-grid { gap: 8px; margin-bottom: 15px; }
+        body.mobile-mode .stats-bar { padding: 8px; margin-bottom: 15px; gap: 5px; font-size: 0.8em; }
+
+        .store-grid { display: grid; gap: 15px; margin-top: 20px; text-align: left; }
+        body.pc-mode .store-grid { grid-template-columns: repeat(3, 1fr); max-height: 50vh; overflow-y: auto; padding: 10px; }
+        body.mobile-mode .store-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+
+        .weapon-card { border: 2px solid #555; padding: 15px; background: #111; cursor: pointer; }
         .weapon-card.unlocked { border-color: var(--accent-color); }
         .weapon-card.highlighted { border-color: #fff; box-shadow: 0 0 15px #fff; background: #333; transform: scale(1.02); transition: 0.1s; }
         .weapon-card.selected { box-shadow: 0 0 10px var(--accent-color); background: #1a2a2a; }
-        .weapon-card h4 { margin: 0 0 2px 0; font-size: 1em; color: #fff; }
-        .weapon-card p { margin: 2px 0; font-size: 0.75em; color: #aaa; }
+        .weapon-card h4 { margin: 0 0 5px 0; color: #fff; }
+        .weapon-card p { margin: 2px 0; color: #aaa; }
         .buy-btn-hint { color: var(--gold-color); font-weight: bold; font-size: 0.8em; margin-top: 5px; display: block; }
-        
-        .mutations-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
-        .mutation-card { border: 1px solid var(--accent-color); padding: 15px; background: #111; }
 
-        /* --- CONTROLES INFERIORES --- */
-        #bottomSection {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            background: #d0d0d0;
-            background-image: linear-gradient(#d0d0d0, #a0a0a0);
-        }
+        body.mobile-mode .weapon-card { padding: 10px; }
+        body.mobile-mode .weapon-card h4 { font-size: 1em; margin-bottom: 2px; }
+        body.mobile-mode .weapon-card p { font-size: 0.75em; }
 
-        #controlArea {
-            flex: 1;
-            position: relative;
-        }
+        .mutations-grid { display: grid; gap: 15px; margin-top: 20px; }
+        body.pc-mode .mutations-grid { grid-template-columns: 1fr 1fr 1fr; }
+        body.mobile-mode .mutations-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+        .mutation-card { border: 1px solid var(--accent-color); padding: 20px; background: #111; cursor: pointer; transition: 0.2s; }
+        .mutation-card:hover { background: #222; transform: scale(1.05); box-shadow: 0 0 15px var(--accent-color); }
+        body.mobile-mode .mutation-card { padding: 15px; }
 
-        #gameplayControls, #storeControls {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
+        #bottomSection { flex: 1; display: flex; flex-direction: column; position: relative; background: #d0d0d0; background-image: linear-gradient(#d0d0d0, #a0a0a0); }
+        body.pc-mode #bottomSection { display: none; }
+
+        #controlArea { flex: 1; position: relative; }
+        #gameplayControls, #storeControls { position: absolute; width: 100%; height: 100%; }
         #storeControls { display: none; }
 
-        /* Estilo general botones GameBoy */
-        .gb-btn { 
-            position: absolute; background: #ff0055; color: #fff; font-weight: bold; 
-            border: 2px solid #333; box-shadow: 2px 4px 0 #333; 
-            display: flex; justify-content: center; align-items: center; 
-            text-shadow: 1px 1px 0 #000;
-        }
+        .gb-btn { position: absolute; background: #ff0055; color: #fff; font-weight: bold; border: 2px solid #333; box-shadow: 2px 4px 0 #333; display: flex; justify-content: center; align-items: center; text-shadow: 1px 1px 0 #000; }
         .gb-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #333; }
         .round { border-radius: 50%; }
         .lg { width: 65px; height: 65px; font-size: 24px; }
         .md { width: 45px; height: 45px; font-size: 18px; }
         .sm { width: 45px; height: 18px; font-size: 10px; border-radius: 10px; background: #444; color: #aaa; border: 2px solid #222; }
 
-        /* Posiciones Gameplay */
-        #joystickBase {
-            position: absolute;
-            left: 5%;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 130px;
-            height: 130px;
-            background: rgba(0,0,0,0.1);
-            border: 3px solid #777;
-            border-radius: 50%;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
-        }
-        #joystickStick {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: #333;
-            border-radius: 50%;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 2px 4px 0 #111;
-        }
+        #joystickBase { position: absolute; left: 5%; top: 50%; transform: translateY(-50%); width: 130px; height: 130px; background: rgba(0,0,0,0.1); border: 3px solid #777; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        #joystickStick { position: absolute; width: 50px; height: 50px; background: #333; border-radius: 50%; left: 50%; top: 50%; transform: translate(-50%, -50%); box-shadow: 2px 4px 0 #111; }
         
         #mobileShoot { bottom: 15%; right: 10%; background: #aa0033; }
         #mobilePause { bottom: 45%; right: 5%; transform: rotate(-20deg); }
@@ -145,42 +118,25 @@
         #mobileReload { bottom: 30%; right: 28%; background: #00aa55; }
         #mobileDash { bottom: 10%; right: 42%; background: #0055aa; }
 
-        /* Posiciones Store */
-        #dpad {
-            position: absolute;
-            left: 10%;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 120px;
-            height: 120px;
-        }
-        .dpad-btn {
-            position: absolute; background: #333; color: #fff; border: 2px solid #111;
-            width: 40px; height: 40px; font-size: 18px; display: flex; justify-content: center; align-items: center;
-            box-shadow: 2px 2px 0 #111; padding:0; margin:0; border-radius: 4px;
-        }
+        #dpad { position: absolute; left: 10%; top: 50%; transform: translateY(-50%); width: 120px; height: 120px; }
+        .dpad-btn { position: absolute; background: #333; color: #fff; border: 2px solid #111; width: 40px; height: 40px; font-size: 18px; display: flex; justify-content: center; align-items: center; box-shadow: 2px 2px 0 #111; padding:0; margin:0; border-radius: 4px; }
         .dpad-btn:active { transform: translate(2px, 2px); box-shadow: none; }
         #btnUp { left: 40px; top: 0; }
         #btnDown { left: 40px; bottom: 0; }
         #btnLeft { left: 0; top: 40px; }
         #btnRight { right: 0; top: 40px; }
-
         #btnStoreBuy { bottom: 25%; right: 10%; background: #aa0033; }
         #btnStoreBack { bottom: 15%; right: 35%; background: #444; }
 
-        /* --- LEADERBOARD --- */
-        #leaderboardPanel { 
-            flex: 0 0 80px; 
-            background: #111; 
-            border-top: 3px solid var(--accent-color); 
-            padding: 5px 15px; 
-            box-sizing: border-box; 
-            overflow-y: auto; 
-            text-align: center;
-        }
-        #leaderboardPanel h2 { color: var(--accent-color); font-size: 1em; margin: 2px 0; }
-        .lb-entry { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid #333; font-size: 0.8em; }
+        #leaderboardPanel { background: #111; border: 2px solid var(--accent-color); padding: 20px; box-sizing: border-box; overflow-y: auto; text-align: center; }
+        #leaderboardPanel h2 { color: var(--accent-color); font-size: 1.2em; margin-top: 0; }
+        .lb-entry { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333; font-size: 0.9em; }
         .lb-entry span:nth-child(2) { color: var(--gold-color); }
+
+        body.pc-mode #leaderboardPanel { width: 250px; height: 768px; border-radius: 8px; }
+        body.mobile-mode #leaderboardPanel { flex: 0 0 80px; border-radius: 0; border-width: 3px 0 0 0; padding: 5px 15px; }
+        body.mobile-mode #leaderboardPanel h2 { font-size: 1em; margin: 2px 0; }
+        body.mobile-mode .lb-entry { padding: 2px 0; font-size: 0.8em; }
     </style>
 </head>
 <body>
@@ -214,6 +170,7 @@
                 <div id="storeScreen" class="screen">
                     <h2>ARMERÍA</h2><p>Créditos: <span id="storeCoins" style="color:var(--gold-color)"></span></p>
                     <div class="store-grid" id="storeContainer"></div>
+                    <button id="btnBackToMenuPC" style="margin-top: 20px; display: none;">Volver al Menú</button>
                 </div>
                 <div id="mutationScreen" class="screen">
                     <h2>MUTACIÓN</h2><p>Selecciona mejora:</p>
@@ -259,10 +216,14 @@
                 <button id="btnStoreBack" class="gb-btn round md">BACK</button>
             </div>
         </div>
-        <div id="leaderboardPanel">
+        <div id="leaderboardPanelMobile">
             <h2>TOP PILOTOS</h2>
-            <div id="lbContainer"></div>
+            <div id="lbContainerMobile"></div>
         </div>
+    </div>
+    <div id="leaderboardPanel">
+        <h2>TOP PILOTOS</h2>
+        <div id="lbContainerPC"></div>
     </div>
 </div>
 
@@ -270,24 +231,27 @@
 const CANVAS_WIDTH = 1024, CANVAS_HEIGHT = 768, TILE_SIZE = 64;
 
 const WEAPONS = {
-    p1: { id: 'p1', name: 'Pistola Básica', type: 'pistol', tier: 1, cost: 0, damage: 8, fireRate: 350, speed: 600, spread: 0.04, auto: false, color: '#aaa', magSize: 12, reloadTime: 1.2 },
-    p2: { id: 'p2', name: 'Pistola Táctica', type: 'pistol', tier: 2, cost: 150, damage: 15, fireRate: 300, speed: 700, spread: 0.03, auto: false, color: '#0f0', magSize: 15, reloadTime: 1.0 },
-    p3: { id: 'p3', name: 'Cañón de Mano', type: 'pistol', tier: 3, cost: 500, damage: 30, fireRate: 400, speed: 800, spread: 0.02, auto: false, color: '#f0f', magSize: 7, reloadTime: 1.5 },
-    s1: { id: 's1', name: 'Escopeta Recortada', type: 'shotgun', tier: 1, cost: 0, damage: 6, fireRate: 1000, speed: 450, spread: 0.4, auto: false, bullets: 5, color: '#aaa', magSize: 2, reloadTime: 1.8 },
-    s2: { id: 's2', name: 'Escopeta Combate', type: 'shotgun', tier: 2, cost: 200, damage: 9, fireRate: 850, speed: 500, spread: 0.35, auto: false, bullets: 7, color: '#0f0', magSize: 6, reloadTime: 2.0 },
-    s3: { id: 's3', name: 'Aniquiladora', type: 'shotgun', tier: 3, cost: 600, damage: 12, fireRate: 700, speed: 550, spread: 0.3, auto: false, bullets: 10, color: '#f0f', magSize: 8, reloadTime: 2.2 },
-    r1: { id: 'r1', name: 'Rifle Oxidado', type: 'rifle', tier: 1, cost: 0, damage: 4, fireRate: 150, speed: 700, spread: 0.15, auto: true, color: '#aaa', magSize: 30, reloadTime: 2.0 },
-    r2: { id: 'r2', name: 'Rifle Asalto', type: 'rifle', tier: 2, cost: 250, damage: 6, fireRate: 120, speed: 800, spread: 0.1, auto: true, color: '#0f0', magSize: 40, reloadTime: 1.8 },
-    r3: { id: 'r3', name: 'Rifle Plasma', type: 'rifle', tier: 3, cost: 750, damage: 9, fireRate: 90, speed: 1000, spread: 0.05, auto: true, color: '#0ff', magSize: 50, reloadTime: 1.5 },
-    sn1: { id: 'sn1', name: 'Francotirador Antiguo', type: 'sniper', tier: 1, cost: 300, damage: 40, fireRate: 1200, speed: 1200, spread: 0.01, auto: false, color: '#ffaa00', magSize: 5, reloadTime: 2.5 },
-    sn2: { id: 'sn2', name: 'Francotirador Pesado', type: 'sniper', tier: 2, cost: 600, damage: 70, fireRate: 1400, speed: 1500, spread: 0.005, auto: false, color: '#ff5500', magSize: 4, reloadTime: 2.8 },
-    sn3: { id: 'sn3', name: 'Riel Magnético', type: 'sniper', tier: 3, cost: 1200, damage: 150, fireRate: 1500, speed: 2000, spread: 0, auto: false, color: '#ff0000', magSize: 3, reloadTime: 3.0 },
-    g1: { id: 'g1', name: 'Lanzagranadas Ligero', type: 'grenade', tier: 1, cost: 400, damage: 25, fireRate: 1000, speed: 400, spread: 0.1, auto: false, color: '#ff00aa', explosive: true, radius: 60, magSize: 4, reloadTime: 2.5 },
-    g2: { id: 'g2', name: 'Cañón Bombardero', type: 'grenade', tier: 2, cost: 800, damage: 45, fireRate: 900, speed: 450, spread: 0.08, auto: false, color: '#aa00ff', explosive: true, radius: 80, magSize: 6, reloadTime: 3.0 },
-    g3: { id: 'g3', name: 'Devastador AoE', type: 'grenade', tier: 3, cost: 1500, damage: 80, fireRate: 800, speed: 500, spread: 0.05, auto: false, color: '#5500ff', explosive: true, radius: 100, magSize: 8, reloadTime: 3.5 },
-    l1: { id: 'l1', name: 'Emisor Láser', type: 'laser', tier: 1, cost: 350, damage: 2, fireRate: 40, speed: 1000, spread: 0.02, auto: true, color: '#00ffcc', magSize: 100, reloadTime: 2.0 },
-    l2: { id: 'l2', name: 'Rayo Continuo', type: 'laser', tier: 2, cost: 700, damage: 4, fireRate: 30, speed: 1200, spread: 0.01, auto: true, color: '#00ffaa', magSize: 150, reloadTime: 2.2 },
-    l3: { id: 'l3', name: 'Láser de Fusión', type: 'laser', tier: 3, cost: 1300, damage: 7, fireRate: 20, speed: 1500, spread: 0, auto: true, color: '#00ff55', magSize: 200, reloadTime: 2.5 }
+    w1: { id: 'w1', name: 'Pistola Básica', damage: 8, cost: 0, fireRate: 350, speed: 600, spread: 0.04, auto: false, color: '#aaa', magSize: 12, reloadTime: 1.2, type: 'pistol' },
+    w2: { id: 'w2', name: 'Revólver', damage: 15, cost: 100, fireRate: 400, speed: 700, spread: 0.02, auto: false, color: '#0f0', magSize: 6, reloadTime: 1.5, type: 'pistol' },
+    w3: { id: 'w3', name: 'Subfusil', damage: 5, cost: 200, fireRate: 100, speed: 700, spread: 0.1, auto: true, color: '#0ff', magSize: 30, reloadTime: 1.8, type: 'rifle' },
+    w4: { id: 'w4', name: 'Escopeta Ligera', damage: 6, cost: 350, fireRate: 900, speed: 500, spread: 0.3, auto: false, color: '#ffaa00', magSize: 4, reloadTime: 2.0, type: 'shotgun', bullets: 5 },
+    w5: { id: 'w5', name: 'Rifle de Asalto', damage: 10, cost: 500, fireRate: 150, speed: 800, spread: 0.08, auto: true, color: '#f0f', magSize: 40, reloadTime: 2.2, type: 'rifle' },
+    w6: { id: 'w6', name: 'Cañón de Iones', damage: 25, cost: 700, fireRate: 500, speed: 900, spread: 0.01, auto: false, color: '#00ffcc', magSize: 8, reloadTime: 2.5, type: 'rifle' },
+    w7: { id: 'w7', name: 'Láser Táctico', damage: 3, cost: 900, fireRate: 40, speed: 1200, spread: 0.02, auto: true, color: '#0f0', magSize: 100, reloadTime: 2.0, type: 'laser' },
+    w8: { id: 'w8', name: 'Francotirador', damage: 40, cost: 1200, fireRate: 1200, speed: 1500, spread: 0.005, auto: false, color: '#ff5500', magSize: 5, reloadTime: 2.8, type: 'sniper' },
+    w9: { id: 'w9', name: 'Lanzagranadas', damage: 30, cost: 1500, fireRate: 1000, speed: 450, spread: 0.1, auto: false, color: '#aa00ff', magSize: 4, reloadTime: 3.0, type: 'grenade', explosive: true, radius: 80 },
+    w10: { id: 'w10', name: 'Escopeta Pesada', damage: 8, cost: 1800, fireRate: 1100, speed: 550, spread: 0.35, auto: false, color: '#f00', magSize: 6, reloadTime: 2.5, type: 'shotgun', bullets: 7 },
+    w11: { id: 'w11', name: 'Ametralladora', damage: 8, cost: 2200, fireRate: 80, speed: 850, spread: 0.12, auto: true, color: '#ffaa00', magSize: 80, reloadTime: 3.5, type: 'rifle' },
+    w12: { id: 'w12', name: 'Rifle de Plasma', damage: 15, cost: 2600, fireRate: 130, speed: 1000, spread: 0.05, auto: true, color: '#00ffcc', magSize: 50, reloadTime: 2.0, type: 'rifle' },
+    w13: { id: 'w13', name: 'Emisor de Ondas', damage: 5, cost: 3000, fireRate: 800, speed: 600, spread: 0.4, auto: false, color: '#00aaff', magSize: 10, reloadTime: 2.5, type: 'shotgun', bullets: 10 },
+    w14: { id: 'w14', name: 'Arco Eléctrico', damage: 20, cost: 3500, fireRate: 200, speed: 1500, spread: 0.01, auto: true, color: '#ffff00', magSize: 30, reloadTime: 2.2, type: 'laser' },
+    w15: { id: 'w15', name: 'Cañón Gauss', damage: 60, cost: 4000, fireRate: 1500, speed: 2000, spread: 0, auto: false, color: '#ff0055', magSize: 3, reloadTime: 3.0, type: 'sniper' },
+    w16: { id: 'w16', name: 'Lanza Misiles', damage: 50, cost: 4500, fireRate: 1200, speed: 500, spread: 0.05, auto: false, color: '#ff0000', magSize: 4, reloadTime: 3.5, type: 'grenade', explosive: true, radius: 100 },
+    w17: { id: 'w17', name: 'Láser Pesado', damage: 6, cost: 5000, fireRate: 30, speed: 1200, spread: 0.01, auto: true, color: '#ff00ff', magSize: 200, reloadTime: 3.0, type: 'laser' },
+    w18: { id: 'w18', name: 'Desintegrador', damage: 35, cost: 6000, fireRate: 300, speed: 1100, spread: 0.02, auto: true, color: '#00ff00', magSize: 40, reloadTime: 2.5, type: 'rifle' },
+    w19: { id: 'w19', name: 'Materia Oscura', damage: 100, cost: 10000, fireRate: 1500, speed: 600, spread: 0, auto: false, color: '#330066', magSize: 2, reloadTime: 4.0, type: 'grenade', explosive: true, radius: 150 },
+    w20: { id: 'w20', name: 'Rayo de la Muerte', damage: 150, cost: 15000, fireRate: 1500, speed: 3000, spread: 0, auto: false, color: '#ffffff', magSize: 3, reloadTime: 3.5, type: 'sniper' },
+    w21: { id: 'w21', name: 'Aniquilador Supremo', damage: 300, cost: 25000, fireRate: 2000, speed: 800, spread: 0, auto: false, color: '#ff0000', magSize: 1, reloadTime: 5.0, type: 'grenade', explosive: true, radius: 250 }
 };
 
 const ENEMY_CONFIGS = {
@@ -297,7 +261,7 @@ const ENEMY_CONFIGS = {
     summoner: { color: '#8800ff', hp: 40, speed: 50, damage: 5, radius: 16, type: 'summoner' },
     healer: { color: '#00ff88', hp: 30, speed: 70, damage: 5, radius: 14, type: 'healer' },
     shielded: { color: '#0088ff', hp: 35, speed: 60, damage: 12, radius: 18, type: 'shielded' },
-    boss:  { color: '#ff00ff', hp: 1000, speed: 90, damage: 40, radius: 25, type: 'boss' }
+    boss:  { color: '#ff00ff', hp: 1000, speed: 90, damage: 20, radius: 25, type: 'boss' }
 };
 
 const MUTATIONS = [
@@ -310,24 +274,30 @@ const MUTATIONS = [
 ];
 
 let db = { users: {} }, currentUser = null, soundEnabled = true;
+let isMobileMode = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth <= 1024;
+document.body.classList.add(isMobileMode ? 'mobile-mode' : 'pc-mode');
 
-function saveDB() { localStorage.setItem('NEON_ARMOR_GB', JSON.stringify(db)); }
+function saveDB() { localStorage.setItem('NEON_ARMOR_DB', JSON.stringify(db)); }
 function loadDB() {
-    const data = localStorage.getItem('NEON_ARMOR_GB');
+    const data = localStorage.getItem('NEON_ARMOR_DB');
     if (data) db = JSON.parse(data);
     if (!db.users) db.users = {};
     updateLeaderboard();
 }
 
 function updateLeaderboard() {
-    const container = document.getElementById('lbContainer');
-    if(!container) return;
-    container.innerHTML = '';
     let arr = Object.keys(db.users).map(k => ({ user: k, score: db.users[k].highScore || 0 })).filter(x => x.score > 0);
-    arr.sort((a, b) => b.score - a.score).slice(0, 10).forEach((entry, i) => {
-        const div = document.createElement('div'); div.className = 'lb-entry';
-        div.innerHTML = `<span>${i+1}. ${entry.user}</span><span>${entry.score}</span>`;
-        container.appendChild(div);
+    arr.sort((a, b) => b.score - a.score).slice(0, 10);
+    
+    const cPC = document.getElementById('lbContainerPC');
+    const cMob = document.getElementById('lbContainerMobile');
+    if(cPC) cPC.innerHTML = '';
+    if(cMob) cMob.innerHTML = '';
+
+    arr.forEach((entry, i) => {
+        const html = `<span>${i+1}. ${entry.user}</span><span>${entry.score}</span>`;
+        if(cPC) { let d = document.createElement('div'); d.className = 'lb-entry'; d.innerHTML = html; cPC.appendChild(d); }
+        if(cMob) { let d = document.createElement('div'); d.className = 'lb-entry'; d.innerHTML = html; cMob.appendChild(d); }
     });
 }
 
@@ -531,7 +501,6 @@ class Prop {
             }
             if(this.state === 1) {
                 if(distance(this.x, this.y, game.player.x, game.player.y) < this.radius + game.player.radius) game.player.takeDamage(10, game);
-                game.enemies.forEach(e => { if(distance(this.x, this.y, e.x, e.y) < this.radius + e.radius) e.takeDamage(10, game, false); });
             }
         }
     }
@@ -714,6 +683,7 @@ class Player {
         this.isDashing = false; this.dashTimer = 0; this.dashCooldown = 1.5; this.dashCooldownTimer = 0;
         this.invulnerableTimer = 0; this.angle = 0;
         this.dmgMult = 1.0; this.defenseMult = 1.0; this.bounceCount = 0;
+        this.mutations = [];
     }
     update(dt, game, level) {
         if (this.dashCooldownTimer > 0) this.dashCooldownTimer -= dt;
@@ -738,15 +708,17 @@ class Player {
         let targetX = game.input.mouse.x + game.camera.x;
         let targetY = game.input.mouse.y + game.camera.y;
 
-        let closest = null, minDist = 600;
-        for (let e of game.enemies) {
-            if (e.active) {
-                let d = distance(this.x, this.y, e.x, e.y);
-                if (d < minDist) { minDist = d; closest = e; }
+        if (isMobileMode) {
+            let closest = null, minDist = 600;
+            for (let e of game.enemies) {
+                if (e.active) {
+                    let d = distance(this.x, this.y, e.x, e.y);
+                    if (d < minDist) { minDist = d; closest = e; }
+                }
             }
+            if (closest) { targetX = closest.x; targetY = closest.y; }
+            else if (dx !== 0 || dy !== 0) { targetX = this.x + dx * 100; targetY = this.y + dy * 100; }
         }
-        if (closest) { targetX = closest.x; targetY = closest.y; }
-        else if (dx !== 0 || dy !== 0) { targetX = this.x + dx * 100; targetY = this.y + dy * 100; }
 
         this.angle = Math.atan2(targetY - this.y, targetX - this.x);
 
@@ -825,6 +797,10 @@ class Enemy {
                         }
                     }
                     if(spawned) game.spawnParticles(this.x, this.y, '#ffaa00', 30);
+                }
+                
+                if (this.phase2 && Math.random() < 0.02 && this.checkLOS(player, level)) {
+                    this.weapon.fire(this.x, this.y, player.x, player.y, game, game.time, true);
                 }
                 
                 if (Math.random() < 0.005) { 
@@ -909,7 +885,7 @@ class Enemy {
         if (!level.checkCollision(this.x, ny, this.radius) && !this.checkPropCollision(this.x, ny, game.props)) this.y = ny;
     }
     checkPropCollision(x, y, props) {
-        for(let p of props) if(p.active && distance(x, y, p.x, p.y) < this.radius + p.radius) return true;
+        for(let p of props) if(p.active && p.type !== 'trap' && distance(x, y, p.x, p.y) < this.radius + p.radius) return true;
         return false;
     }
     takeDamage(amount, game, fromPlayer=true) {
@@ -996,6 +972,17 @@ class Game {
         
         window.addEventListener('keydown', e => { this.input.keys[e.code] = true; if(e.code === 'Escape') this.togglePause(); });
         window.addEventListener('keyup', e => { this.input.keys[e.code] = false; });
+        
+        this.canvas.addEventListener('mousemove', e => { 
+            if(isMobileMode) return;
+            const r = this.canvas.getBoundingClientRect(); 
+            const scaleX = this.canvas.width / r.width;
+            const scaleY = this.canvas.height / r.height;
+            this.input.mouse.x = (e.clientX - r.left) * scaleX; 
+            this.input.mouse.y = (e.clientY - r.top) * scaleY; 
+        });
+        this.canvas.addEventListener('mousedown', () => { if(!isMobileMode) this.input.mouse.down = true; });
+        this.canvas.addEventListener('mouseup', () => { if(!isMobileMode) this.input.mouse.down = false; });
 
         this.setupMobileControls();
 
@@ -1015,8 +1002,10 @@ class Game {
     }
 
     setupMobileControls() {
+        if(!isMobileMode) return;
         const bindBtn = (id, key) => {
             const el = document.getElementById(id);
+            if(!el) return;
             el.addEventListener('touchstart', (e)=>{ e.preventDefault(); this.input.keys[key] = true; }, {passive: false});
             el.addEventListener('touchend', (e)=>{ e.preventDefault(); this.input.keys[key] = false; }, {passive: false});
         };
@@ -1088,12 +1077,8 @@ class Game {
         this.levelIndex = 0; this.score = 0; this.runCoins = 0; this.targetLevels = randInt(5, 11);
         this.wave = 1; this.waveTimer = 0; this.bossSpawned = false; this.flowTimer = 0;
         
-        this.mutationLevels = []; this.mutationShownForWave = {};
-        let pool = []; for(let i=1; i<this.targetLevels-1; i++) pool.push(i);
-        while(this.mutationLevels.length < 3 && pool.length > 0) {
-            let idx = randInt(0, pool.length);
-            this.mutationLevels.push(pool.splice(idx, 1)[0]);
-        }
+        this.nextMutationLevel = this.levelIndex + randInt(2, 5);
+        this.mutationShownForWave = {};
     }
 
     setupDOM() {
@@ -1101,7 +1086,7 @@ class Game {
             const user = document.getElementById('usernameInput').value.trim(), pass = document.getElementById('passwordInput').value;
             if(user && pass) {
                 if(db.users[user] && db.users[user].password !== pass) return alert('Contraseña incorrecta');
-                if(!db.users[user]) { db.users[user] = { password: pass, coins: 0, wins: 0, deaths: 0, unlocks: ['p1', 's1', 'r1'], selectedWeapon: 'p1', highScore: 0 }; saveDB(); }
+                if(!db.users[user]) { db.users[user] = { password: pass, coins: 0, wins: 0, deaths: 0, unlocks: ['w1'], selectedWeapon: 'w1', highScore: 0 }; saveDB(); }
                 currentUser = user; this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU';
                 audioSys.init(); audioSys.startBGM('menu');
             }
@@ -1109,7 +1094,14 @@ class Game {
         document.getElementById('btnLogout').onclick = () => { currentUser = null; document.getElementById('passwordInput').value=''; this.setUIState('loginScreen'); this.state='LOGIN'; audioSys.stopBGM(); };
         document.getElementById('btnStory').onclick = () => this.startRun('STORY');
         document.getElementById('btnSurvival').onclick = () => this.startRun('SURVIVAL');
-        document.getElementById('btnStore').onclick = () => { this.storeSelectedIndex = 0; this.renderStore(); this.setUIState('storeScreen'); this.state = 'STORE'; };
+        
+        document.getElementById('btnStore').onclick = () => { 
+            this.storeSelectedIndex = 0; 
+            if(!isMobileMode) document.getElementById('btnBackToMenuPC').style.display = 'inline-block';
+            this.renderStore(); this.setUIState('storeScreen'); this.state = 'STORE'; 
+        };
+        document.getElementById('btnBackToMenuPC').onclick = () => { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; };
+        
         document.getElementById('btnSound').onclick = () => this.toggleSound();
         document.getElementById('btnPauseSound').onclick = () => this.toggleSound();
         document.getElementById('btnResume').onclick = () => this.togglePause();
@@ -1130,17 +1122,20 @@ class Game {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); 
         if (screenId) document.getElementById(screenId).classList.add('active'); 
         
-        document.getElementById('storeControls').style.display = 'none';
-        document.getElementById('gameplayControls').style.display = 'none';
-        
-        if (screenId === 'storeScreen') {
-            document.getElementById('storeControls').style.display = 'block';
-        } else {
-            document.getElementById('gameplayControls').style.display = 'block';
+        if (isMobileMode) {
+            document.getElementById('storeControls').style.display = 'none';
+            document.getElementById('gameplayControls').style.display = 'none';
+            
+            if (screenId === 'storeScreen') {
+                document.getElementById('storeControls').style.display = 'block';
+            } else {
+                document.getElementById('gameplayControls').style.display = 'block';
+            }
         }
     }
 
     moveStoreSelection(dir) {
+        if(!isMobileMode) return;
         const keys = Object.keys(WEAPONS);
         this.storeSelectedIndex += dir;
         if (this.storeSelectedIndex < 0) this.storeSelectedIndex = 0;
@@ -1151,9 +1146,10 @@ class Game {
         if(cards[this.storeSelectedIndex]) cards[this.storeSelectedIndex].scrollIntoView({block: 'nearest', behavior: 'smooth'});
     }
 
-    buySelectedStoreItem() {
+    buySelectedStoreItem(key = null) {
         const keys = Object.keys(WEAPONS);
-        const w = WEAPONS[keys[this.storeSelectedIndex]];
+        const wKey = key || keys[this.storeSelectedIndex];
+        const w = WEAPONS[wKey];
         const u = db.users[currentUser];
         if (u.unlocks.includes(w.id)) {
             u.selectedWeapon = w.id;
@@ -1174,15 +1170,20 @@ class Game {
         keys.forEach((k, index) => {
             const w = WEAPONS[k];
             const isUnlocked = u.unlocks.includes(w.id), isSelected = u.selectedWeapon === w.id;
-            const isHighlighted = index === this.storeSelectedIndex;
+            const isHighlighted = isMobileMode && index === this.storeSelectedIndex;
             
             const div = document.createElement('div'); 
             div.className = `weapon-card ${isUnlocked ? 'unlocked' : ''} ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlighted' : ''}`;
+            
+            if (!isMobileMode) {
+                div.onclick = () => this.buySelectedStoreItem(k);
+            }
+
             let html = `<h4>${w.name}</h4><p>Daño: ${w.damage} | Mun: ${w.magSize}</p>`;
             if (isUnlocked) { html += `<p style="color:var(--accent-color)">DESBLOQUEADA</p>`; } 
             else { html += `<p class="price">Costo: ${w.cost} Cr</p>`; }
             
-            if (isHighlighted) {
+            if (isMobileMode && isHighlighted) {
                 html += `<span class="buy-btn-hint">${isUnlocked ? (isSelected ? 'EQUIPADO' : 'PRESIONA BUY PARA EQUIPAR') : 'PRESIONA BUY PARA COMPRAR'}</span>`;
             }
             div.innerHTML = html;
@@ -1224,14 +1225,27 @@ class Game {
     }
 
     triggerMutation() {
+        let available = MUTATIONS.filter(m => !this.player.mutations.includes(m.id));
+        if(available.length === 0) {
+            if(this.mode === 'STORY') { this.levelIndex++; this.loadLevel(); } else { this.waveTimer = 3; }
+            return;
+        }
+
         this.state = 'MUTATION'; this.setUIState('mutationScreen');
         const cont = document.getElementById('mutationsContainer'); cont.innerHTML = '';
-        let choices = []; let temp = [...MUTATIONS];
-        for(let i=0; i<3; i++) { let idx = randInt(0, temp.length); choices.push(temp.splice(idx,1)[0]); }
+        let choices = [];
+        
+        for(let i=0; i<3; i++) { 
+            if(available.length === 0) break;
+            let idx = randInt(0, available.length); 
+            choices.push(available.splice(idx,1)[0]); 
+        }
+
         choices.forEach(m => {
             const div = document.createElement('div'); div.className = 'mutation-card'; div.innerHTML = `<h3>${m.name}</h3>`;
             div.onclick = () => { 
-                m.apply(this.player); 
+                m.apply(this.player);
+                this.player.mutations.push(m.id);
                 this.setUIState(null); this.state = 'PLAYING';
                 if(this.mode === 'STORY') {
                     this.levelIndex++; this.loadLevel();
@@ -1300,7 +1314,7 @@ class Game {
             if(this.enemies.length === 0) { 
                 this.waveTimer -= dt; 
                 if(this.waveTimer <= 0) {
-                    if(this.wave > 1 && (this.wave - 1) % 15 === 0 && !this.mutationShownForWave[this.wave]) {
+                    if(this.wave > 1 && (this.wave - 1) % randInt(3,6) === 0 && !this.mutationShownForWave[this.wave]) {
                         this.mutationShownForWave[this.wave] = true;
                         this.triggerMutation();
                     } else {
@@ -1353,8 +1367,12 @@ class Game {
 
         if (this.portal && distance(this.player.x, this.player.y, this.portal.x, this.portal.y) < this.player.radius + this.portal.radius) {
             if (this.levelIndex === this.targetLevels - 1) { this.endRun(true); return; }
-            if (this.mutationLevels.includes(this.levelIndex)) this.triggerMutation();
-            else { this.levelIndex++; this.loadLevel(); }
+            if (this.levelIndex === this.nextMutationLevel) { 
+                this.nextMutationLevel = this.levelIndex + randInt(2, 5);
+                this.triggerMutation(); 
+            } else { 
+                this.levelIndex++; this.loadLevel(); 
+            }
             return;
         }
 
@@ -1408,7 +1426,7 @@ class Game {
 
         this.ctx.restore();
 
-        if (this.state === 'PLAYING' || this.state === 'PAUSED') { this.drawHUD(); }
+        if (this.state === 'PLAYING' || this.state === 'PAUSED') { this.drawHUD(); this.drawMinimap(); }
         if (this.state === 'PAUSED') { this.ctx.fillStyle = 'rgba(0,0,0,0.5)'; this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); }
     }
 
@@ -1435,6 +1453,30 @@ class Game {
         if(this.mode === 'STORY') { ctx.fillStyle = '#00ffcc'; ctx.fillText(`Nv: ${this.levelIndex + 1}/${this.targetLevels}`, CANVAS_WIDTH - 20, 40); ctx.fillStyle = '#fff'; ctx.fillText(`Pts: ${this.score}`, CANVAS_WIDTH - 20, 70); } 
         else { ctx.fillStyle = '#ff0055'; ctx.fillText(`Oleada: ${this.wave - 1}`, CANVAS_WIDTH - 20, 40); if(this.enemies.length === 0 && this.waveTimer > 0) { ctx.fillStyle = '#fff'; ctx.fillText(`Sig: ${Math.ceil(this.waveTimer)}s`, CANVAS_WIDTH - 20, 70); } }
         ctx.textAlign = 'left';
+    }
+
+    drawMinimap() {
+        if(!this.level) return;
+        const ctx = this.ctx, size = 150, scale = size / (this.level.cols * this.level.tileSize);
+        let mapX = CANVAS_WIDTH - size - 20;
+        let mapY = CANVAS_HEIGHT - size - 20;
+
+        if (isMobileMode) {
+            mapX = 20;
+            mapY = 150;
+        }
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; ctx.fillRect(mapX, mapY, size, size); ctx.strokeStyle = '#00ffcc'; ctx.strokeRect(mapX, mapY, size, size);
+
+        for (let y = 0; y < this.level.rows; y++) {
+            for (let x = 0; x < this.level.cols; x++) {
+                if (this.level.grid[y][x] === 1) { ctx.fillStyle = 'rgba(50, 50, 70, 0.8)'; ctx.fillRect(mapX + x * this.level.tileSize * scale, mapY + y * this.level.tileSize * scale, this.level.tileSize * scale, this.level.tileSize * scale); }
+            }
+        }
+        if(this.portal) { ctx.fillStyle = '#ff00ff'; ctx.beginPath(); ctx.arc(mapX + this.portal.x * scale, mapY + this.portal.y * scale, 3, 0, Math.PI*2); ctx.fill(); }
+        this.items.forEach(item => { ctx.fillStyle = item.type === 'coin' ? '#ffd700' : '#0f0'; ctx.beginPath(); ctx.arc(mapX + item.x * scale, mapY + item.y * scale, 1.5, 0, Math.PI*2); ctx.fill(); });
+        this.enemies.forEach(e => { ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.arc(mapX + e.x * scale, mapY + e.y * scale, 2, 0, Math.PI*2); ctx.fill(); });
+        ctx.fillStyle = '#00ffcc'; ctx.beginPath(); ctx.arc(mapX + this.player.x * scale, mapY + this.player.y * scale, 3, 0, Math.PI*2); ctx.fill();
     }
 
     loop(timestamp) {
