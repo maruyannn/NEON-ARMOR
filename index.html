@@ -47,11 +47,11 @@
         body.mobile-mode .store-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .weapon-card { border: 2px solid #555; padding: 15px; background: #111; cursor: pointer; position: relative; }
         .weapon-card.unlocked { border-color: var(--accent-color); }
-        .weapon-card.highlighted { border-color: #fff; box-shadow: 0 0 15px #fff; background: #333; transform: scale(1.02); transition: 0.1s; }
+        .weapon-card.highlighted { border-color: #fff; box-shadow: 0 0 15px #fff; background: #333; transform: scale(1.02); transition: 0.1s; z-index: 5; }
         .weapon-card.selected { box-shadow: 0 0 10px var(--accent-color); background: #1a2a2a; }
         .weapon-card h4 { margin: 0 0 5px 0; color: #fff; display: flex; justify-content: space-between; align-items: center; }
-        .weapon-card p { margin: 2px 0; color: #aaa; }
-        .weapon-sprite-ui { height: 24px; image-rendering: pixelated; }
+        .weapon-card p { margin: 2px 0; color: #aaa; font-size: 0.85em; }
+        .weapon-sprite-ui { height: 32px; image-rendering: pixelated; }
         .buy-btn-hint { color: var(--gold-color); font-weight: bold; font-size: 0.8em; margin-top: 5px; display: block; }
         body.mobile-mode .weapon-card { padding: 10px; }
         body.mobile-mode .weapon-card h4 { font-size: 1em; margin-bottom: 2px; }
@@ -130,16 +130,14 @@
                         Misión Diaria: Eliminar 50 Enemigos (<span id="uiMissionProgress">0</span>/50)
                         <button id="btnClaimMission" class="nav-item" style="display:none; padding: 5px 10px; font-size: 0.8em; margin-left: 10px;">RECLAMAR (+100 Cr)</button>
                     </div>
-                    <div style="margin-bottom:15px;">
-                        <button id="btnCycleClass" class="nav-item" style="background:#8800ff; color:#fff; width:100%;">CLASE: TANQUE</button>
-                    </div>
                     <div class="menu-grid">
                         <button id="btnStory" class="nav-item">HISTORIA</button>
                         <button id="btnSurvival" class="nav-item danger">SUPERVIVENCIA</button>
                         <button id="btnStore" class="nav-item">ARMERÍA</button>
-                        <button id="btnCodex" class="nav-item">CÓDICE</button>
+                        <button id="btnPilots" class="nav-item" style="background:#8800ff; color:#fff;">PILOTOS</button>
+                        <button id="btnLibrary" class="nav-item">BIBLIOTECA</button>
                         <button id="btnSound" class="nav-item">SONIDO: <span id="soundStatus">ON</span></button>
-                        <button id="btnLogout" class="nav-item" style="background:#444; color:#fff;">Cerrar Sesión</button>
+                        <button id="btnLogout" class="nav-item" style="background:#444; color:#fff; grid-column: span 2;">Cerrar Sesión</button>
                     </div>
                 </div>
                 <div id="storeScreen" class="screen">
@@ -148,20 +146,26 @@
                     <button id="btnPCStoreAction" class="nav-item danger" style="margin-top:20px; display:none;">COMPRAR / EQUIPAR</button>
                     <button id="btnBackToMenuPC" class="nav-item" style="margin-top: 20px; display: none;">Volver al Menú</button>
                 </div>
+                <div id="pilotsScreen" class="screen">
+                    <h2 style="color:#8800ff;">CUARTEL DE PILOTOS</h2><p>Selecciona tu clase:</p>
+                    <div class="store-grid" id="pilotsContainer"></div>
+                    <button id="btnPCPilotsAction" class="nav-item danger" style="margin-top:20px; display:none;">SELECCIONAR</button>
+                    <button id="btnPilotsBack" class="nav-item" style="margin-top: 20px; display: none;">Volver al Menú</button>
+                </div>
                 <div id="stashScreen" class="screen">
                     <h2>BAÚL DE ARMAS</h2><p>Selecciona un arma para equipar:</p>
                     <div class="store-grid" id="stashContainer"></div>
                     <button id="btnStashEquip" class="nav-item danger" style="margin-top:20px;">EQUIPAR</button>
-                    <button id="btnStashClose" class="nav-item" style="margin-top: 20px;">Cerrar (Esc)</button>
+                    <button id="btnStashClose" class="nav-item" style="margin-top: 20px;">Cerrar</button>
                 </div>
                 <div id="mutationScreen" class="screen">
                     <h2>MUTACIÓN</h2><p>Selecciona mejora:</p>
                     <div class="mutations-grid" id="mutationsContainer"></div>
                 </div>
-                <div id="codexScreen" class="screen">
-                    <h2>CÓDICE</h2>
-                    <div id="codexContent" style="text-align:left; max-height:40vh; overflow-y:auto; font-size:0.9em; border:1px solid #444; padding:10px; margin-bottom:10px;"></div>
-                    <button id="btnCodexBack" class="nav-item">Volver</button>
+                <div id="libraryScreen" class="screen">
+                    <h2>BIBLIOTECA</h2><p>Enemigos Descubiertos:</p>
+                    <div class="store-grid" id="libraryContainer"></div>
+                    <button id="btnLibraryBack" class="nav-item" style="margin-top:20px; display:none;">Volver</button>
                 </div>
                 <div id="pauseScreen" class="screen">
                     <h2>PAUSADO</h2>
@@ -222,57 +226,165 @@
 const CANVAS_WIDTH = 1024, CANVAS_HEIGHT = 768, TILE_SIZE = 64;
 
 const SPRITE_DATA = {
-    player: [
+    player_tank: [
         "      0000      ",
-        "    00333300    ",
-        "   0333333330   ",
-        "  033333333330  ",
-        "  011111111110  ",
-        " 01100000000110 ",
-        " 01022222222010 ",
-        " 01022222222010 ",
-        " 01022222222010 ",
-        " 01100000000110 ",
-        " 01111111111110 ",
-        "  011111111110  ",
-        "  001110011100  ",
-        "   0111001110   ",
+        "    00cccc00    ",
+        "   0cccccccc0   ",
+        "  0cccccccccc0  ",
+        "  0cccccccccc0  ",
+        " 0cc00000000cc0 ",
+        " 0c0dddddddd0c0 ",
+        " 0c0dddddddd0c0 ",
+        " 0c0dddddddd0c0 ",
+        " 0cc00000000cc0 ",
+        " 0cccccccccccc0 ",
+        "  0cccccccccc0  ",
+        "  00ccc00ccc00  ",
+        "   0ccc00ccc0   ",
         "   0000  0000   ",
         "                "
     ],
-    player_walk: [
+    player_tank_walk: [
         "      0000      ",
-        "    00333300    ",
-        "   0333333330   ",
-        "  033333333330  ",
-        "  011111111110  ",
-        " 01100000000110 ",
-        " 01022222222010 ",
-        " 01022222222010 ",
-        " 01022222222010 ",
-        " 01100000000110 ",
-        " 01111111111110 ",
-        "  011111111110  ",
-        "   01110011100  ",
-        "   0000 01110   ",
+        "    00cccc00    ",
+        "   0cccccccc0   ",
+        "  0cccccccccc0  ",
+        "  0cccccccccc0  ",
+        " 0cc00000000cc0 ",
+        " 0c0dddddddd0c0 ",
+        " 0c0dddddddd0c0 ",
+        " 0c0dddddddd0c0 ",
+        " 0cc00000000cc0 ",
+        " 0cccccccccccc0 ",
+        "  0cccccccccc0  ",
+        "   0ccc00ccc00  ",
+        "   0000 0ccc0   ",
         "         0000   ",
         "                "
     ],
-    player_dead: [
+    player_tank_dead: [
         "                ",
         "                ",
         "                ",
         "                ",
         "                ",
         "       000      ",
-        "     0011100    ",
-        "    030122200   ",
-        "   0330112220   ",
-        "   0330111110   ",
-        "    030111100   ",
-        "     0011110    ",
-        "      011110    ",
-        "     01100110   ",
+        "     00ccc00    ",
+        "    0c0cdddc0   ",
+        "   0cc0ccdddc0  ",
+        "   0cc0cccccc0  ",
+        "    0c0cccc00   ",
+        "     00cccc0    ",
+        "      0cccc0    ",
+        "     0cc00cc0   ",
+        "    0000  0000  ",
+        "                "
+    ],
+    player_assassin: [
+        "      0000      ",
+        "    00999900    ",
+        "   0999999990   ",
+        "  099999999990  ",
+        "  099999999990  ",
+        " 09900000000990 ",
+        " 09055555555090 ",
+        " 09055555555090 ",
+        " 09055555555090 ",
+        " 09900000000990 ",
+        " 09999999999990 ",
+        "  099999999990  ",
+        "  009990099900  ",
+        "   0999009990   ",
+        "   0000  0000   ",
+        "                "
+    ],
+    player_assassin_walk: [
+        "      0000      ",
+        "    00999900    ",
+        "   0999999990   ",
+        "  099999999990  ",
+        "  099999999990  ",
+        " 09900000000990 ",
+        " 09055555555090 ",
+        " 09055555555090 ",
+        " 09055555555090 ",
+        " 09900000000990 ",
+        " 09999999999990 ",
+        "  099999999990  ",
+        "   09990099900  ",
+        "   0000 09990   ",
+        "         0000   ",
+        "                "
+    ],
+    player_assassin_dead: [
+        "                ",
+        "                ",
+        "                ",
+        "                ",
+        "                ",
+        "       000      ",
+        "     0099900    ",
+        "    090955590   ",
+        "   09909955590  ",
+        "   09909999990  ",
+        "    090999900   ",
+        "     0099990    ",
+        "      099990    ",
+        "     09900990   ",
+        "    0000  0000  ",
+        "                "
+    ],
+    player_engineer: [
+        "      0000      ",
+        "    00888800    ",
+        "   0888888880   ",
+        "  088888888880  ",
+        "  088888888880  ",
+        " 08800000000880 ",
+        " 08077777777080 ",
+        " 08077777777080 ",
+        " 08077777777080 ",
+        " 08800000000880 ",
+        " 08888888888880 ",
+        "  088888888880  ",
+        "  008880088800  ",
+        "   0888008880   ",
+        "   0000  0000   ",
+        "                "
+    ],
+    player_engineer_walk: [
+        "      0000      ",
+        "    00888800    ",
+        "   0888888880   ",
+        "  088888888880  ",
+        "  088888888880  ",
+        " 08800000000880 ",
+        " 08077777777080 ",
+        " 08077777777080 ",
+        " 08077777777080 ",
+        " 08800000000880 ",
+        " 08888888888880 ",
+        "  088888888880  ",
+        "   08880088800  ",
+        "   0000 08880   ",
+        "         0000   ",
+        "                "
+    ],
+    player_engineer_dead: [
+        "                ",
+        "                ",
+        "                ",
+        "                ",
+        "                ",
+        "       000      ",
+        "     0088800    ",
+        "    080877780   ",
+        "   08808877780  ",
+        "   08808888880  ",
+        "    080888800   ",
+        "     0088880    ",
+        "      088880    ",
+        "     08800880   ",
         "    0000  0000  ",
         "                "
     ],
@@ -914,9 +1026,9 @@ const ENEMY_CONFIGS = {
 };
 
 const PILOT_CLASSES = [
-    { id: 'tank', name: 'TANQUE', hp: 150, speed: 180, dmgMult: 1.0, regen: 0 },
-    { id: 'assassin', name: 'ASESINO', hp: 70, speed: 260, dmgMult: 1.3, regen: 0 },
-    { id: 'engineer', name: 'INGENIERO', hp: 100, speed: 220, dmgMult: 1.0, regen: 1 }
+    { id: 'tank', name: 'TANQUE', hp: 150, speed: 180, dmgMult: 1.0, regen: 0, desc: "Alta resistencia a costa de movilidad." },
+    { id: 'assassin', name: 'ASESINO', hp: 70, speed: 260, dmgMult: 1.3, regen: 0, desc: "Alta velocidad y daño extra. Muy frágil." },
+    { id: 'engineer', name: 'INGENIERO', hp: 100, speed: 220, dmgMult: 1.0, regen: 1, desc: "Estadísticas balanceadas. Regenera HP." }
 ];
 
 const MUTATIONS = [
@@ -1465,14 +1577,16 @@ class Player {
     }
     draw(ctx, time) {
         ctx.save(); ctx.translate(this.x, this.y);
+        let baseName = 'player_' + this.pClass.id;
         if (!this.active) {
-            if(window.renderedSprites.player_dead) ctx.drawImage(window.renderedSprites.player_dead, -this.radius*1.5, -this.radius*1.5, this.radius*3, this.radius*3);
+            let sprite = window.renderedSprites[baseName + '_dead'];
+            if(sprite) ctx.drawImage(sprite, -this.radius*1.5, -this.radius*1.5, this.radius*3, this.radius*3);
         } else {
             let facingLeft = Math.cos(this.angle) < 0;
             ctx.save(); ctx.scale(facingLeft ? -1 : 1, 1);
             if (this.invulnerableTimer > 0 && Math.floor(this.invulnerableTimer * 20) % 2 === 0) ctx.globalAlpha = 0.5;
-            let sprite = window.renderedSprites.player;
-            if (this.isMoving && Math.floor(time / 150) % 2 === 0) sprite = window.renderedSprites.player_walk;
+            let sprite = window.renderedSprites[baseName];
+            if (this.isMoving && Math.floor(time / 150) % 2 === 0) sprite = window.renderedSprites[baseName + '_walk'];
             if(sprite) ctx.drawImage(sprite, -this.radius*1.5, -this.radius*1.5, this.radius*3, this.radius*3);
             ctx.restore();
             this.weapon.draw(ctx, 0, 0, this.angle);
@@ -1617,9 +1731,13 @@ class Enemy {
             this.active = false; audioSys.sfxEnemyDeath();
             game.corpses.push({ type: this.type, x: this.x, y: this.y, facingLeft: this.facingLeft, phase2: this.phase2, life: 30 });
             if(this.type === 'acid') game.customParticles.push({ type: 'acidPool', x: this.x, y: this.y, life: 5, radius: 25 });
+            
+            let u = db.users[currentUser];
+            if (!u.discoveredEnemies) u.discoveredEnemies = [];
+            if (!u.discoveredEnemies.includes(this.type)) { u.discoveredEnemies.push(this.type); saveDB(); }
+
             if (fromPlayer && !this.summoned) {
                 if (game.mode === 'STORY') { if (this.type === 'boss') game.score += 500; else game.score += randInt(1, 6); }
-                let u = db.users[currentUser];
                 if (u.mission && u.mission.progress < u.mission.target) {
                     u.mission.progress++; if(u.mission.progress >= u.mission.target) saveDB();
                 }
@@ -1706,8 +1824,9 @@ class Game {
             this.input.keys[e.code] = true; 
             if(e.code === 'Escape' || e.code === 'KeyP') {
                 if(this.state === 'STORE') { document.getElementById('btnBackToMenuPC').click(); if(isMobileMode) document.getElementById('btnNavBack').click(); }
+                else if(this.state === 'PILOTS') { document.getElementById('btnPilotsBack').click(); if(isMobileMode) document.getElementById('btnNavBack').click(); }
                 else if(this.state === 'STASH') { document.getElementById('btnStashClose').click(); }
-                else if(this.state === 'CODEX') { document.getElementById('btnCodexBack').click(); }
+                else if(this.state === 'LIBRARY') { document.getElementById('btnLibraryBack').click(); if(isMobileMode) document.getElementById('btnNavBack').click(); }
                 else if(this.state === 'PLAYING' || this.state === 'PAUSED') this.togglePause(); 
             }
             if(e.code === 'KeyE') { if (this.state === 'PLAYING' && this.nearStash && this.mode === 'SURVIVAL') this.openStash(); }
@@ -1746,7 +1865,7 @@ class Game {
         this.state = 'LOGIN'; this.mode = 'STORY'; this.lastTime = 0; this.time = 0;
         this.camera = { x: 0, y: 0 }; this.shakeTime = 0; this.shakeMagnitude = 0; this.flowTimer = 0;
         this.lastFlowX = null; this.lastFlowY = null;
-        this.storeSelectedIndex = 0; this.pcSelectedWeaponId = null;
+        this.storeSelectedIndex = 0; this.pcSelectedWeaponId = null; this.pcSelectedPilotId = null;
         this.introTimer = 0; this.nearStash = false;
         this.selectedPilotClassIdx = 0;
         this.fadeState = null; this.fadeTimer = 0;
@@ -1812,8 +1931,9 @@ class Game {
         document.getElementById('btnNavBack').addEventListener('touchstart', (e)=>{ 
             e.preventDefault(); 
             if(this.state === 'STORE') { document.getElementById('btnBackToMenuPC').click(); }
+            if(this.state === 'PILOTS') { document.getElementById('btnPilotsBack').click(); }
             if(this.state === 'STASH') { document.getElementById('btnStashClose').click(); }
-            if(this.state === 'CODEX') { document.getElementById('btnCodexBack').click(); }
+            if(this.state === 'LIBRARY') { document.getElementById('btnLibraryBack').click(); }
         });
     }
 
@@ -1832,10 +1952,12 @@ class Game {
             if(user && pass) {
                 if(db.users[user] && db.users[user].password !== pass) return alert('Contraseña incorrecta');
                 let isNewUser = !db.users[user];
-                if(isNewUser) { db.users[user] = { password: pass, coins: 0, wins: 0, deaths: 0, unlocks: ['w1'], selectedWeapon: 'w1', highScore: 0, tutorialDone: false, mission: { current: 0, target: 50 }, pilotClass: 'tank' }; saveDB(); }
+                if(isNewUser) { db.users[user] = { password: pass, coins: 0, wins: 0, deaths: 0, unlocks: ['w1'], selectedWeapon: 'w1', highScore: 0, tutorialDone: false, mission: { current: 0, target: 50 }, pilotClass: 'tank', discoveredEnemies: [] }; saveDB(); }
                 currentUser = user;
                 let cIdx = PILOT_CLASSES.findIndex(c => c.id === db.users[currentUser].pilotClass);
                 if(cIdx >= 0) this.selectedPilotClassIdx = cIdx;
+                if (!db.users[currentUser].discoveredEnemies) { db.users[currentUser].discoveredEnemies = []; saveDB(); }
+
                 if (isNewUser || !db.users[currentUser].tutorialDone) { this.setUIState(null); this.state = 'INTRO'; this.introTimer = 7.0; } 
                 else { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; audioSys.init(); audioSys.startBGM('menu'); }
             }
@@ -1843,24 +1965,32 @@ class Game {
         document.getElementById('btnLogout').onclick = () => { currentUser = null; document.getElementById('passwordInput').value=''; this.setUIState('loginScreen'); this.state='LOGIN'; audioSys.stopBGM(); };
         document.getElementById('btnStory').onclick = () => this.startRun('STORY');
         document.getElementById('btnSurvival').onclick = () => this.startRun('SURVIVAL');
-        document.getElementById('btnCycleClass').onclick = () => {
-            this.selectedPilotClassIdx = (this.selectedPilotClassIdx + 1) % PILOT_CLASSES.length;
-            db.users[currentUser].pilotClass = PILOT_CLASSES[this.selectedPilotClassIdx].id; saveDB();
-            document.getElementById('btnCycleClass').innerText = "CLASE: " + PILOT_CLASSES[this.selectedPilotClassIdx].name;
-        };
+        
         document.getElementById('btnStore').onclick = () => { 
-            this.storeSelectedIndex = 0; 
+            this.navIndex = 0; 
             if(!isMobileMode) { document.getElementById('btnBackToMenuPC').style.display = 'inline-block'; document.getElementById('btnPCStoreAction').style.display = 'inline-block'; }
             this.pcSelectedWeaponId = null; this.renderStore(); this.setUIState('storeScreen'); this.state = 'STORE'; 
         };
         document.getElementById('btnPCStoreAction').onclick = () => { if(this.pcSelectedWeaponId) this.buySelectedStoreItem(this.pcSelectedWeaponId); };
         document.getElementById('btnBackToMenuPC').onclick = () => { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; };
+        
+        document.getElementById('btnPilots').onclick = () => {
+            this.navIndex = 0;
+            if(!isMobileMode) { document.getElementById('btnPilotsBack').style.display = 'inline-block'; document.getElementById('btnPCPilotsAction').style.display = 'inline-block'; }
+            this.pcSelectedPilotId = null; this.renderPilots(); this.setUIState('pilotsScreen'); this.state = 'PILOTS';
+        };
+        document.getElementById('btnPCPilotsAction').onclick = () => { if(this.pcSelectedPilotId) this.selectPilotClass(this.pcSelectedPilotId); };
+        document.getElementById('btnPilotsBack').onclick = () => { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; };
+
         document.getElementById('btnStashClose').onclick = () => { this.setUIState(null); this.state = 'PLAYING'; };
         document.getElementById('btnStashEquip').onclick = () => {
             if (this.pcSelectedWeaponId && this.player) { this.player.weapon = new Weapon(WEAPONS[this.pcSelectedWeaponId]); this.setUIState(null); this.state = 'PLAYING'; }
         };
-        document.getElementById('btnCodex').onclick = () => { this.renderCodex(); this.setUIState('codexScreen'); this.state = 'CODEX'; };
-        document.getElementById('btnCodexBack').onclick = () => { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; };
+        document.getElementById('btnLibrary').onclick = () => { 
+            if(!isMobileMode) document.getElementById('btnLibraryBack').style.display = 'inline-block';
+            this.renderLibrary(); this.setUIState('libraryScreen'); this.state = 'LIBRARY'; 
+        };
+        document.getElementById('btnLibraryBack').onclick = () => { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; };
         document.getElementById('btnClaimMission').onclick = () => {
             let u = db.users[currentUser];
             if(u.mission && u.mission.progress >= u.mission.target) { u.coins += 100; u.mission.progress = 0; u.mission.target = 50; saveDB(); this.updateMenuUI(); }
@@ -1884,7 +2014,7 @@ class Game {
         if(!activeScreen) { this.navElements = []; return; }
         this.navElements = Array.from(activeScreen.querySelectorAll('.nav-item'));
         if(this.navElements.length > 0) {
-            this.navIndex = 0;
+            if (this.navIndex >= this.navElements.length) this.navIndex = 0;
             this.navElements[this.navIndex].classList.add('nav-focus');
             this.navElements[this.navIndex].scrollIntoView({block: 'nearest', behavior: 'smooth'});
         }
@@ -1902,6 +2032,9 @@ class Game {
         if (this.state === 'STORE') {
             this.pcSelectedWeaponId = Object.keys(WEAPONS)[this.navIndex];
             this.renderStore();
+        } else if (this.state === 'PILOTS') {
+            this.pcSelectedPilotId = PILOT_CLASSES[this.navIndex].id;
+            this.renderPilots();
         } else if (this.state === 'STASH') {
             let u = db.users[currentUser];
             this.pcSelectedWeaponId = u.unlocks[this.navIndex];
@@ -1914,6 +2047,8 @@ class Game {
             this.navElements[this.navIndex].click();
         } else if (this.state === 'STORE' && isMobileMode) {
             this.buySelectedStoreItem();
+        } else if (this.state === 'PILOTS' && isMobileMode) {
+            this.selectPilotClass();
         }
     }
 
@@ -1923,9 +2058,6 @@ class Game {
         document.getElementById('uiUser').innerText = currentUser; document.getElementById('uiWins').innerText = u.wins;
         document.getElementById('uiDeaths').innerText = u.deaths; document.getElementById('uiCoins').innerText = u.coins;
         document.getElementById('uiMissionProgress').innerText = u.mission.progress || 0;
-        let cIdx = PILOT_CLASSES.findIndex(c => c.id === u.pilotClass); if(cIdx >= 0) this.selectedPilotClassIdx = cIdx;
-        document.getElementById('btnCycleClass').innerText = "CLASE: " + PILOT_CLASSES[this.selectedPilotClassIdx].name;
-        
         let claimBtn = document.getElementById('btnClaimMission');
         if (u.mission.progress >= u.mission.target) claimBtn.style.display = 'inline-block'; else claimBtn.style.display = 'none';
     }
@@ -1989,6 +2121,73 @@ class Game {
         this.refreshNavElements();
     }
 
+    selectPilotClass(key = null) {
+        const pKey = key || PILOT_CLASSES[this.navIndex].id;
+        const u = db.users[currentUser];
+        u.pilotClass = pKey;
+        saveDB();
+        this.renderPilots();
+    }
+
+    renderPilots() {
+        const u = db.users[currentUser];
+        const cont = document.getElementById('pilotsContainer'); cont.innerHTML = '';
+        
+        PILOT_CLASSES.forEach((c, index) => {
+            const isSelected = u.pilotClass === c.id;
+            let isHighlighted = c.id === this.pcSelectedPilotId || (isMobileMode && index === this.navIndex);
+            
+            const div = document.createElement('div'); 
+            div.className = `weapon-card nav-item unlocked ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlighted' : ''}`;
+            
+            if (!isMobileMode) div.onclick = () => { this.pcSelectedPilotId = c.id; this.renderPilots(); };
+            else div.onclick = () => { this.selectPilotClass(c.id); };
+
+            let spriteName = 'player_' + c.id;
+            let spriteDataUrl = window.renderedSprites[spriteName] ? window.renderedSprites[spriteName].toDataURL() : '';
+            let imgHtml = spriteDataUrl ? `<img src="${spriteDataUrl}" class="weapon-sprite-ui" style="transform: scale(1.5);">` : '';
+
+            let html = `<h4><span>${c.name}</span> ${imgHtml}</h4><p>HP: ${c.hp} | Vel: ${c.speed} | Dmg: x${c.dmgMult}</p>`;
+            html += `<p style="font-size:0.75em; color:#ccc;">${c.desc}</p>`;
+            if (isMobileMode && isHighlighted) { html += `<span class="buy-btn-hint">${isSelected ? 'EQUIPADO' : 'PRESIONA ENT PARA SELECCIONAR'}</span>`; }
+            div.innerHTML = html; cont.appendChild(div);
+        });
+
+        if (!isMobileMode) {
+            let btn = document.getElementById('btnPCPilotsAction');
+            if(this.pcSelectedPilotId) {
+                let isSel = u.pilotClass === this.pcSelectedPilotId;
+                if(!isSel) { btn.innerText = "SELECCIONAR"; btn.style.display = 'inline-block'; }
+                else { btn.style.display = 'none'; }
+            } else { btn.style.display = 'none'; }
+        }
+        this.refreshNavElements();
+    }
+
+    renderLibrary() {
+        const u = db.users[currentUser];
+        const cont = document.getElementById('libraryContainer'); cont.innerHTML = '';
+        
+        Object.keys(ENEMY_CONFIGS).forEach((key, index) => {
+            const e = ENEMY_CONFIGS[key];
+            const discovered = u.discoveredEnemies && u.discoveredEnemies.includes(key);
+            
+            const div = document.createElement('div'); 
+            div.className = `weapon-card ${discovered ? 'unlocked' : ''}`;
+            
+            if (discovered) {
+                let spriteName = 'enemy_' + key;
+                let spriteDataUrl = window.renderedSprites[spriteName] ? window.renderedSprites[spriteName].toDataURL() : '';
+                let imgHtml = spriteDataUrl ? `<img src="${spriteDataUrl}" class="weapon-sprite-ui" style="transform: scale(1.5);">` : '';
+                div.innerHTML = `<h4><span>${key.toUpperCase()}</span> ${imgHtml}</h4><p>HP: ${e.hp} | Vel: ${Math.floor(e.speed)} | Dmg: ${e.damage}</p><p style="color:#aaa; font-size:0.8em; margin-top:5px;">${e.desc}</p>`;
+            } else {
+                div.innerHTML = `<h4><span style="color:#555;">???</span></h4><p style="color:#555;">Enemigo no descubierto</p>`;
+            }
+            cont.appendChild(div);
+        });
+        this.refreshNavElements();
+    }
+
     openStash() { this.storeSelectedIndex = 0; this.pcSelectedWeaponId = null; this.renderStash(); this.setUIState('stashScreen'); this.state = 'STASH'; }
 
     renderStash() {
@@ -2014,18 +2213,6 @@ class Game {
             let btn = document.getElementById('btnStashEquip');
             if(this.pcSelectedWeaponId) btn.style.display = 'inline-block'; else btn.style.display = 'none';
         }
-        this.refreshNavElements();
-    }
-
-    renderCodex() {
-        let u = db.users[currentUser];
-        let html = `<h3 style="color:var(--accent-color);">ARMAS DESBLOQUEADAS</h3>`;
-        u.unlocks.forEach(wId => { let w = WEAPONS[wId]; html += `<p><strong>${w.name}</strong> - Dmg: ${w.damage} | Tipo: ${w.type.toUpperCase()}</p>`; });
-        html += `<h3 style="color:#ff0055; margin-top:15px;">ENEMIGOS CONOCIDOS</h3>`;
-        for(let key in ENEMY_CONFIGS) {
-            let e = ENEMY_CONFIGS[key]; html += `<p><strong>${key.toUpperCase()}</strong> - HP Base: ${e.hp} | Vel: ${e.speed}<br><span style="color:#aaa; font-size:0.9em;">${e.desc}</span></p>`;
-        }
-        document.getElementById('codexContent').innerHTML = html;
         this.refreshNavElements();
     }
 
@@ -2201,7 +2388,11 @@ class Game {
             if(gpJustDown(14)) this.moveNav(-1); 
             if(gpJustDown(15)) this.moveNav(1); 
             if(gpJustDown(0)) this.triggerNavEnter();
-            if(gpJustDown(1)) { if(this.state === 'STORE') document.getElementById('btnBackToMenuPC').click(); }
+            if(gpJustDown(1)) { 
+                if(this.state === 'STORE') document.getElementById('btnBackToMenuPC').click(); 
+                if(this.state === 'PILOTS') document.getElementById('btnPilotsBack').click(); 
+                if(this.state === 'LIBRARY') document.getElementById('btnLibraryBack').click(); 
+            }
         } else {
             if(gpJustDown(9)) this.togglePause();
         }
@@ -2217,9 +2408,7 @@ class Game {
             let el = document.getElementById('fadeOverlay');
             el.style.display = 'block';
             el.style.backgroundColor = `rgba(0,0,0,${Math.min(1, 1 - (this.fadeTimer/3.0))})`;
-            if (this.fadeTimer <= 0) {
-                el.style.display = 'none'; this.fadeState = null; this.endRun(true);
-            }
+            if (this.fadeTimer <= 0) { el.style.display = 'none'; this.fadeState = null; this.endRun(true); }
             return;
         }
 
@@ -2361,7 +2550,7 @@ class Game {
 
     draw() {
         this.ctx.fillStyle = '#050508'; this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        if (this.state === 'LOGIN' || this.state === 'MENU' || this.state === 'STORE' || this.state === 'CODEX') return;
+        if (this.state === 'LOGIN' || this.state === 'MENU' || this.state === 'STORE' || this.state === 'PILOTS' || this.state === 'LIBRARY') return;
 
         if (this.state === 'INTRO') {
             this.ctx.fillStyle = '#000'; this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
