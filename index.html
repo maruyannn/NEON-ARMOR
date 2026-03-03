@@ -19,7 +19,7 @@
         .screen { display: none; pointer-events: auto; }
         .screen.active { display: block !important; }
         body.pc-mode .screen { background: var(--ui-bg); padding: 30px; border: 2px solid var(--accent-color); border-radius: 8px; text-align: center; box-shadow: 0 0 15px var(--accent-color); max-width: 800px; max-height: 90%; overflow-y: auto; }
-        body.mobile-mode .screen { background: var(--ui-bg); padding: 15px; border: 2px solid var(--accent-color); border-radius: 0; text-align: center; width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        body.mobile-mode .screen { background: var(--ui-bg); padding: 15px; border: 2px solid var(--accent-color); border-radius: 0; text-align: center; width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; overflow-x: hidden; }
         h1 { margin-top: 0; color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color); }
         h2 { color: var(--danger-color); margin-top: 0; text-shadow: 0 0 8px var(--danger-color); }
         h3 { color: var(--gold-color); margin-bottom: 5px; }
@@ -29,7 +29,8 @@
         body.mobile-mode h2 { font-size: 1.2em; }
         body.mobile-mode h3 { font-size: 1em; }
         body.mobile-mode p { font-size: 0.9em; }
-        input { padding: 10px; font-size: 1em; font-family: inherit; background: #000; border: 1px solid var(--accent-color); color: #fff; width: 80%; margin-bottom: 15px; text-align: center; box-sizing: border-box; }
+        input[type="text"], input[type="password"] { padding: 10px; font-size: 1em; font-family: inherit; background: #000; border: 1px solid var(--accent-color); color: #fff; width: 80%; margin-bottom: 15px; text-align: center; box-sizing: border-box; }
+        input[type="range"] { width: 80%; margin: 10px 0 20px 0; accent-color: var(--accent-color); }
         button { background: var(--accent-color); color: #000; border: none; padding: 12px 24px; font-size: 1em; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: inherit; margin: 5px; transition: 0.2s; box-shadow: 0 0 5px var(--accent-color); }
         button:hover { background: #fff; box-shadow: 0 0 15px #fff; }
         button.danger { background: var(--danger-color); color: #fff; box-shadow: 0 0 5px var(--danger-color); }
@@ -82,7 +83,7 @@
         #mobileReload { bottom: 45%; right: 28%; background: #00aa55; }
         #mobileDash { bottom: 20%; right: 42%; background: #0055aa; }
         #mobileInteract { bottom: 50%; right: 10%; background: #ffaa00; display: none; }
-        #mobileMelee { bottom: 65%; right: 28%; background: #ff8800; }
+        #mobileMelee { bottom: 65%; right: 12%; background: #ff8800; }
         #dpadNav { position: absolute; left: 10%; top: 40%; transform: translateY(-50%); width: 120px; height: 120px; }
         .dpad-btn { position: absolute; background: #333; color: #fff; border: 2px solid #111; width: 40px; height: 40px; font-size: 18px; display: flex; justify-content: center; align-items: center; box-shadow: 2px 2px 0 #111; padding:0; margin:0; border-radius: 4px; }
         .dpad-btn:active { transform: translate(2px, 2px); box-shadow: none; }
@@ -136,7 +137,7 @@
                         <button id="btnStore" class="nav-item">ARMERÍA</button>
                         <button id="btnPilots" class="nav-item" style="background:#8800ff; color:#fff;">PILOTOS</button>
                         <button id="btnLibrary" class="nav-item">BIBLIOTECA</button>
-                        <button id="btnSound" class="nav-item">SONIDO: <span id="soundStatus">ON</span></button>
+                        <button id="btnSoundMenu" class="nav-item">SONIDO</button>
                         <button id="btnLogout" class="nav-item" style="background:#444; color:#fff; grid-column: span 2;">Cerrar Sesión</button>
                     </div>
                 </div>
@@ -167,10 +168,18 @@
                     <div class="store-grid" id="libraryContainer"></div>
                     <button id="btnLibraryBack" class="nav-item" style="margin-top:20px; display:none;">Volver</button>
                 </div>
+                <div id="soundSettingsScreen" class="screen">
+                    <h2>AJUSTES DE SONIDO</h2>
+                    <p>Música (BGM):</p>
+                    <input type="range" id="bgmVolSlider" class="nav-item" min="0" max="100" value="50">
+                    <p>Efectos (SFX):</p>
+                    <input type="range" id="sfxVolSlider" class="nav-item" min="0" max="100" value="50">
+                    <br><br>
+                    <button id="btnSoundBack" class="nav-item">Volver</button>
+                </div>
                 <div id="pauseScreen" class="screen">
                     <h2>PAUSADO</h2>
                     <button id="btnResume" class="nav-item">Continuar</button>
-                    <button id="btnPauseSound" class="nav-item">Sonido: <span id="pauseSoundStatus">ON</span></button>
                     <button id="btnQuit" class="nav-item danger">Abandonar</button>
                     <div id="pauseMutationsList"></div>
                 </div>
@@ -1041,6 +1050,7 @@ const MUTATIONS = [
 ];
 
 let db = { users: {} }, currentUser = null, soundEnabled = true;
+let globalBgmVol = 0.5, globalSfxVol = 0.5;
 let isMobileMode = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth <= 1024;
 document.body.classList.add(isMobileMode ? 'mobile-mode' : 'pc-mode');
 
@@ -1083,9 +1093,10 @@ class AudioSystem {
         const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
         osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
         if (slideFreq) osc.frequency.exponentialRampToValueAtTime(slideFreq, this.ctx.currentTime + duration);
-        gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+        gain.gain.setValueAtTime(vol * globalSfxVol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
         osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + duration);
     }
+    sfxFootstep() { this.playTone(150, 'square', 0.02, 0.01); }
     sfxShoot() { this.playTone(600, 'square', 0.1, 0.05, 200); }
     sfxHit() { this.playTone(150, 'sawtooth', 0.1, 0.1, 50); }
     sfxEnemyDeath() { this.playTone(100, 'square', 0.2, 0.1, 10); }
@@ -1098,21 +1109,27 @@ class AudioSystem {
     sfxReloadPerfect() { this.playTone(1200, 'sine', 0.2, 0.1, 1800); }
     sfxLaserWarn() { this.playTone(300, 'sine', 0.5, 0.1, 600); }
     sfxLaserFire() { this.playTone(1000, 'sawtooth', 0.4, 0.2, 100); }
+    updateBGMVol() { if(this.bgmGain && this.ctx) this.bgmGain.gain.setValueAtTime(0.04 * globalBgmVol, this.ctx.currentTime); }
     startBGM(type) {
         if(!soundEnabled || !this.ctx) return;
         this.stopBGM();
-        if(type !== 'menu' && type !== 'boss') return; 
         this.bgmOsc = this.ctx.createOscillator(); this.bgmGain = this.ctx.createGain();
-        this.bgmGain.gain.value = 0.02;
+        this.bgmGain.gain.value = 0.02 * globalBgmVol;
         this.bgmOsc.connect(this.bgmGain); this.bgmGain.connect(this.ctx.destination);
-        let seq = []; let speed = 200;
+        let seq = [], speed = 200;
+        
         if(type === 'menu') { this.bgmOsc.type = 'square'; seq = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63]; speed = 200; } 
         else if (type === 'boss') { this.bgmOsc.type = 'sawtooth'; seq = [130.81, 146.83, 130.81, 196.00, 130.81, 146.83, 130.81, 233.08]; speed = 120; }
+        else if (type === 'gameplay') { this.bgmOsc.type = 'triangle'; seq = [146.83, 174.61, 196.00, 220.00, 196.00, 174.61]; speed = 250; }
+        else if (type === 'pause') { this.bgmOsc.type = 'sine'; seq = [220, 220]; speed = 1000; }
+        else if (type === 'death') { this.bgmOsc.type = 'sawtooth'; seq = [200, 180, 160, 140, 120, 100, 80, 60]; speed = 300; }
+        else if (type === 'victory') { this.bgmOsc.type = 'square'; seq = [392, 493.88, 587.33, 783.99]; speed = 150; }
+        
         this.bgmOsc.start();
         this.bgmInterval = setInterval(() => {
             if(this.ctx.state === 'suspended') return;
             this.bgmOsc.frequency.setValueAtTime(seq[this.step % seq.length], this.ctx.currentTime);
-            this.bgmGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+            this.bgmGain.gain.setValueAtTime(0.04 * globalBgmVol, this.ctx.currentTime);
             this.bgmGain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + (speed/2000));
             this.step++;
         }, speed);
@@ -1406,6 +1423,7 @@ class Bullet {
         this.lifeTime -= dt; if (this.lifeTime <= 0) this.active = false;
     }
     checkPropCollision(x, y, game) {
+        if (game.player.isDashing && this.isPlayer) return false;
         for(let p of game.props) {
             if(p.active && p.type !== 'trap' && p.type !== 'stash' && distance(x, y, p.x, p.y) < this.radius + p.radius) {
                 p.takeDamage(this.damage, game); return true;
@@ -1473,7 +1491,7 @@ class Player {
         this.invulnerableTimer = 0; this.angle = 0;
         this.dmgMult = pClass.dmgMult; this.defenseMult = 1.0; this.bounceCount = 0;
         this.mutations = []; this.deadTimer = 0; this.isMoving = false;
-        this.lastAimAngle = 0; this.regenTimer = 0;
+        this.lastAimAngle = 0; this.regenTimer = 0; this.footstepTimer = 0;
     }
     update(dt, game, level) {
         if (this.pClass.regen > 0 && this.hp < this.maxHp) {
@@ -1483,7 +1501,7 @@ class Player {
         if (this.dashCooldownTimer > 0) this.dashCooldownTimer -= dt;
         if (this.meleeTimer > 0) this.meleeTimer -= dt;
         if (this.invulnerableTimer > 0) this.invulnerableTimer -= dt;
-        if (this.dashTimer > 0) { this.dashTimer -= dt; if (this.dashTimer <= 0) this.isDashing = false; }
+        if (this.dashTimer > 0) { this.dashTimer -= dt; if (this.dashTimer <= 0) { this.isDashing = false; } }
         
         if (game.input.keys['ShiftLeft'] && this.dashCooldownTimer <= 0 && !this.isDashing) {
             this.isDashing = true; this.dashTimer = 0.2; this.dashCooldownTimer = this.dashCooldown; this.invulnerableTimer = 0.2;
@@ -1495,6 +1513,7 @@ class Player {
             this.meleeTimer = this.meleeCooldown;
             game.customParticles.push({ type: 'melee', x: this.x, y: this.y, life: 0.2, radius: 40 });
             audioSys.sfxHit();
+            if(game.mode === 'TUTORIAL') game.tutorialMeleed = true;
             game.enemies.forEach(e => {
                 if(e.active && distance(this.x, this.y, e.x, e.y) < 40 + e.radius) {
                     e.takeDamage(15 * this.dmgMult, game);
@@ -1514,12 +1533,16 @@ class Player {
         if (this.isMoving) { 
             const len = Math.hypot(dx, dy); dx /= len; dy /= len; 
             if(game.mode === 'TUTORIAL') game.tutorialMoved = true;
+            if(!this.isDashing) {
+                this.footstepTimer -= dt;
+                if(this.footstepTimer <= 0) { audioSys.sfxFootstep(); this.footstepTimer = 0.35; }
+            }
         }
 
         const curSpeed = this.isDashing ? this.baseSpeed * 3 : this.baseSpeed;
         let nx = this.x + dx * curSpeed * dt, ny = this.y + dy * curSpeed * dt;
-        if (!level.checkCollision(nx, this.y, this.radius) && (!this.checkPropCollision(nx, this.y, game.props) || this.isDashing)) this.x = nx;
-        if (!level.checkCollision(this.x, ny, this.radius) && (!this.checkPropCollision(this.x, ny, game.props) || this.isDashing)) this.y = ny;
+        if (!level.checkCollision(nx, this.y, this.radius) && !this.checkPropCollision(nx, this.y, game.props)) this.x = nx;
+        if (!level.checkCollision(this.x, ny, this.radius) && !this.checkPropCollision(this.x, ny, game.props)) this.y = ny;
 
         let targetX = game.input.mouse.x + game.camera.x;
         let targetY = game.input.mouse.y + game.camera.y;
@@ -1532,10 +1555,22 @@ class Player {
             targetX = this.x + Math.cos(this.angle)*100;
             targetY = this.y + Math.sin(this.angle)*100;
         } else if (isMobileMode) {
-            if (this.isMoving) this.lastAimAngle = Math.atan2(dy, dx);
-            this.angle = this.lastAimAngle;
-            targetX = this.x + Math.cos(this.angle)*100;
-            targetY = this.y + Math.sin(this.angle)*100;
+            let nearest = null; let minDist = 350;
+            for (let e of game.enemies) {
+                if (!e.active) continue;
+                let d = distance(this.x, this.y, e.x, e.y);
+                if (d < minDist && e.checkLOS(this, level)) { minDist = d; nearest = e; }
+            }
+            if (nearest) {
+                this.angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
+                targetX = this.x + Math.cos(this.angle)*100;
+                targetY = this.y + Math.sin(this.angle)*100;
+            } else {
+                if (this.isMoving) this.lastAimAngle = Math.atan2(dy, dx);
+                this.angle = this.lastAimAngle;
+                targetX = this.x + Math.cos(this.angle)*100;
+                targetY = this.y + Math.sin(this.angle)*100;
+            }
         } else {
             this.angle = Math.atan2(targetY - this.y, targetX - this.x);
         }
@@ -1564,7 +1599,15 @@ class Player {
         }
     }
     checkPropCollision(x, y, props) {
-        for(let p of props) if(p.active && p.type !== 'trap' && distance(x, y, p.x, p.y) < this.radius + p.radius) return true;
+        if (this.isDashing) return false;
+        for(let p of props) {
+            if(p.active && p.type !== 'trap' && p.type !== 'stash') {
+                if(distance(x, y, p.x, p.y) < this.radius + p.radius) {
+                    if (distance(this.x, this.y, p.x, p.y) < distance(x, y, p.x, p.y)) continue;
+                    return true;
+                }
+            }
+        }
         return false;
     }
     takeDamage(amount, game) {
@@ -1573,7 +1616,7 @@ class Player {
         this.hp -= finalDmg; this.invulnerableTimer = 0.5;
         audioSys.sfxHit(); game.triggerScreenShake(5); game.spawnParticles(this.x, this.y, '#ff0055', 10);
         game.showDmgText(this.x, this.y, finalDmg, '#f00');
-        if (this.hp <= 0) { this.hp = 0; this.active = false; }
+        if (this.hp <= 0) { this.hp = 0; this.active = false; audioSys.startBGM('death'); }
     }
     draw(ctx, time) {
         ctx.save(); ctx.translate(this.x, this.y);
@@ -1827,6 +1870,7 @@ class Game {
                 else if(this.state === 'PILOTS') { document.getElementById('btnPilotsBack').click(); if(isMobileMode) document.getElementById('btnNavBack').click(); }
                 else if(this.state === 'STASH') { document.getElementById('btnStashClose').click(); }
                 else if(this.state === 'LIBRARY') { document.getElementById('btnLibraryBack').click(); if(isMobileMode) document.getElementById('btnNavBack').click(); }
+                else if(this.state === 'SETTINGS') { document.getElementById('btnSoundBack').click(); if(isMobileMode) document.getElementById('btnNavBack').click(); }
                 else if(this.state === 'PLAYING' || this.state === 'PAUSED') this.togglePause(); 
             }
             if(e.code === 'KeyE') { if (this.state === 'PLAYING' && this.nearStash && this.mode === 'SURVIVAL') this.openStash(); }
@@ -1836,8 +1880,18 @@ class Game {
             if(this.state !== 'PLAYING') {
                 if(e.code === 'ArrowUp') this.moveNav(-1);
                 if(e.code === 'ArrowDown') this.moveNav(1);
-                if(e.code === 'ArrowLeft') this.moveNav(-1);
-                if(e.code === 'ArrowRight') this.moveNav(1);
+                if(e.code === 'ArrowLeft') {
+                    if (this.state === 'SETTINGS' && this.navElements[this.navIndex] && this.navElements[this.navIndex].type === 'range') {
+                        this.navElements[this.navIndex].value = Math.max(0, parseInt(this.navElements[this.navIndex].value) - 10);
+                        this.navElements[this.navIndex].dispatchEvent(new Event('input'));
+                    } else this.moveNav(-1);
+                }
+                if(e.code === 'ArrowRight') {
+                    if (this.state === 'SETTINGS' && this.navElements[this.navIndex] && this.navElements[this.navIndex].type === 'range') {
+                        this.navElements[this.navIndex].value = Math.min(100, parseInt(this.navElements[this.navIndex].value) + 10);
+                        this.navElements[this.navIndex].dispatchEvent(new Event('input'));
+                    } else this.moveNav(1);
+                }
             }
 
             if(this.state === 'MUTATION') {
@@ -1925,8 +1979,20 @@ class Game {
 
         document.getElementById('btnNavUp').addEventListener('touchstart', (e)=>{ e.preventDefault(); this.moveNav(-1); });
         document.getElementById('btnNavDown').addEventListener('touchstart', (e)=>{ e.preventDefault(); this.moveNav(1); });
-        document.getElementById('btnNavLeft').addEventListener('touchstart', (e)=>{ e.preventDefault(); this.moveNav(-1); });
-        document.getElementById('btnNavRight').addEventListener('touchstart', (e)=>{ e.preventDefault(); this.moveNav(1); });
+        document.getElementById('btnNavLeft').addEventListener('touchstart', (e)=>{ 
+            e.preventDefault(); 
+            if (this.state === 'SETTINGS' && this.navElements[this.navIndex] && this.navElements[this.navIndex].type === 'range') {
+                this.navElements[this.navIndex].value = Math.max(0, parseInt(this.navElements[this.navIndex].value) - 10);
+                this.navElements[this.navIndex].dispatchEvent(new Event('input'));
+            } else this.moveNav(-1); 
+        });
+        document.getElementById('btnNavRight').addEventListener('touchstart', (e)=>{ 
+            e.preventDefault(); 
+            if (this.state === 'SETTINGS' && this.navElements[this.navIndex] && this.navElements[this.navIndex].type === 'range') {
+                this.navElements[this.navIndex].value = Math.min(100, parseInt(this.navElements[this.navIndex].value) + 10);
+                this.navElements[this.navIndex].dispatchEvent(new Event('input'));
+            } else this.moveNav(1); 
+        });
         document.getElementById('btnNavEnter').addEventListener('touchstart', (e)=>{ e.preventDefault(); this.triggerNavEnter(); });
         document.getElementById('btnNavBack').addEventListener('touchstart', (e)=>{ 
             e.preventDefault(); 
@@ -1934,6 +2000,7 @@ class Game {
             if(this.state === 'PILOTS') { document.getElementById('btnPilotsBack').click(); }
             if(this.state === 'STASH') { document.getElementById('btnStashClose').click(); }
             if(this.state === 'LIBRARY') { document.getElementById('btnLibraryBack').click(); }
+            if(this.state === 'SETTINGS') { document.getElementById('btnSoundBack').click(); }
         });
     }
 
@@ -1943,7 +2010,7 @@ class Game {
         this.corpses = []; this.levelIndex = 0; this.score = 0; this.runCoins = 0; this.targetLevels = randInt(5, 11);
         this.wave = 1; this.waveTimer = 0; this.bossSpawned = false; this.flowTimer = 0;
         this.nextMutationLevel = this.levelIndex + randInt(2, 5); this.mutationShownForWave = {};
-        this.tutorialStep = 0; this.tutorialMoved = false; this.tutorialFired = false; this.tutorialReloaded = false; this.tutorialDashed = false; this.tutorialItemPicked = false; this.tutorialCombatStarted = false; this.revivesUsed = 0;
+        this.tutorialStep = 0; this.tutorialMoved = false; this.tutorialFired = false; this.tutorialReloaded = false; this.tutorialDashed = false; this.tutorialItemPicked = false; this.tutorialCombatStarted = false; this.tutorialMeleed = false; this.revivesUsed = 0;
     }
 
     setupDOM() {
@@ -1995,14 +2062,19 @@ class Game {
             let u = db.users[currentUser];
             if(u.mission && u.mission.progress >= u.mission.target) { u.coins += 100; u.mission.progress = 0; u.mission.target = 50; saveDB(); this.updateMenuUI(); }
         };
-        document.getElementById('btnSound').onclick = () => this.toggleSound();
+        
+        document.getElementById('btnSoundMenu').onclick = () => { this.setUIState('soundSettingsScreen'); this.state = 'SETTINGS'; };
+        document.getElementById('btnSoundBack').onclick = () => { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; };
+        document.getElementById('bgmVolSlider').oninput = (e) => { globalBgmVol = e.target.value / 100; audioSys.updateBGMVol(); };
+        document.getElementById('sfxVolSlider').oninput = (e) => { globalSfxVol = e.target.value / 100; };
+        
         document.getElementById('btnPauseSound').onclick = () => this.toggleSound();
         document.getElementById('btnResume').onclick = () => this.togglePause();
         document.getElementById('btnQuit').onclick = () => { this.endRun(false); audioSys.startBGM('menu'); };
         document.getElementById('btnReviveAd').onclick = () => {
             if (this.revivesUsed >= 1) return;
             this.revivesUsed++; this.player.active = true; this.player.hp = this.player.maxHp * 0.5; this.player.deadTimer = 0;
-            this.setUIState(null); this.state = 'PLAYING'; audioSys.startBGM(this.enemies.find(e=>e.type==='boss') ? 'boss' : 'menu');
+            this.setUIState(null); this.state = 'PLAYING'; audioSys.startBGM(this.enemies.find(e=>e.type==='boss') ? 'boss' : 'gameplay');
         };
         document.getElementById('btnReturnDead').onclick = () => { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; audioSys.startBGM('menu'); };
         document.getElementById('btnReturnWin').onclick = () => { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; audioSys.startBGM('menu'); };
@@ -2033,18 +2105,22 @@ class Game {
             this.pcSelectedWeaponId = Object.keys(WEAPONS)[this.navIndex];
             this.renderStore();
         } else if (this.state === 'PILOTS') {
-            this.pcSelectedPilotId = PILOT_CLASSES[this.navIndex].id;
-            this.renderPilots();
+            if (this.navIndex < PILOT_CLASSES.length) {
+                this.pcSelectedPilotId = PILOT_CLASSES[this.navIndex].id;
+                this.renderPilots();
+            }
         } else if (this.state === 'STASH') {
             let u = db.users[currentUser];
-            this.pcSelectedWeaponId = u.unlocks[this.navIndex];
-            this.renderStash();
+            if (this.navIndex < u.unlocks.length) {
+                this.pcSelectedWeaponId = u.unlocks[this.navIndex];
+                this.renderStash();
+            }
         }
     }
 
     triggerNavEnter() {
         if(this.navElements.length > 0 && this.navElements[this.navIndex]) {
-            this.navElements[this.navIndex].click();
+            if (this.navElements[this.navIndex].type !== 'range') this.navElements[this.navIndex].click();
         } else if (this.state === 'STORE' && isMobileMode) {
             this.buySelectedStoreItem();
         } else if (this.state === 'PILOTS' && isMobileMode) {
@@ -2079,6 +2155,7 @@ class Game {
     buySelectedStoreItem(key = null) {
         const keys = Object.keys(WEAPONS);
         const wKey = key || keys[this.navIndex];
+        if(!wKey || !WEAPONS[wKey]) return;
         const w = WEAPONS[wKey];
         const u = db.users[currentUser];
         if (u.unlocks.includes(w.id)) { u.selectedWeapon = w.id; saveDB(); this.renderStore(); } 
@@ -2221,7 +2298,7 @@ class Game {
         const u = db.users[currentUser]; 
         let pClass = PILOT_CLASSES.find(c => c.id === u.pilotClass) || PILOT_CLASSES[0];
         this.player = new Player(0, 0, WEAPONS[u.selectedWeapon], pClass);
-        this.setUIState(null); this.state = 'PLAYING'; audioSys.stopBGM();
+        this.setUIState(null); this.state = 'PLAYING'; audioSys.startBGM('gameplay');
         if(this.mode === 'STORY') this.loadLevel();
         else { this.level = new Level(0, 'SURVIVAL'); const sp = this.level.getSpawnPoint(); this.player.x = sp.x; this.player.y = sp.y; }
     }
@@ -2229,7 +2306,7 @@ class Game {
     startTutorial() {
         this.mode = 'TUTORIAL'; this.resetGameData();
         this.player = new Player(0, 0, WEAPONS['w1'], PILOT_CLASSES[0]);
-        this.setUIState(null); this.state = 'PLAYING';
+        this.setUIState(null); this.state = 'PLAYING'; audioSys.startBGM('gameplay');
         this.level = new Level(0, 'STORY', true);
         const spawn = this.level.getSpawnPoint(); this.player.x = spawn.x; this.player.y = spawn.y;
     }
@@ -2245,7 +2322,8 @@ class Game {
         
         const numProps = randInt(20, 40);
         for(let i=0; i<numProps; i++) {
-            let p = this.level.getRandomFloorPoint(); while (distance(p.x, p.y, this.player.x, this.player.y) < 200) p = this.level.getRandomFloorPoint();
+            let p; let attempts = 0;
+            do { p = this.level.getRandomFloorPoint(); attempts++; } while (attempts < 50 && distance(p.x, p.y, this.player.x, this.player.y) < 200);
             let type = Math.random() < 0.2 ? 'barrel' : (Math.random() < 0.8 ? 'cover' : 'trap');
             this.props.push(new Prop(type, p.x, p.y));
         }
@@ -2254,7 +2332,8 @@ class Game {
         
         const numEnemyGroups = 6 + this.levelIndex * 3, scale = 1 + this.levelIndex * 0.2;
         for (let g = 0; g < numEnemyGroups; g++) {
-            let p; do { p = this.level.getRandomFloorPoint(); } while (distance(p.x, p.y, this.player.x, this.player.y) < 400 || this.isPointOnProp(p.x, p.y, 20));
+            let p; let attempts = 0;
+            do { p = this.level.getRandomFloorPoint(); attempts++; } while (attempts < 50 && (distance(p.x, p.y, this.player.x, this.player.y) < 400 || this.isPointOnProp(p.x, p.y, 20)));
             let groupSize = randInt(3, 7);
             for(let i=0; i<groupSize; i++) {
                 let r = Math.random(), type = 'basic';
@@ -2295,16 +2374,22 @@ class Game {
         this.waveTimer = 10;
         if (this.wave > 1 && this.wave % randInt(3, 6) === 0) {
             const numProps = randInt(5, 15);
-            for(let i=0; i<numProps; i++) { let p = this.level.getRandomFloorPoint(); if(distance(p.x, p.y, this.player.x, this.player.y) > 200) { this.props.push(new Prop('cover', p.x, p.y)); } }
+            for(let i=0; i<numProps; i++) { 
+                let p; let attempts=0; 
+                do { p = this.level.getRandomFloorPoint(); attempts++; } while (attempts<50 && distance(p.x, p.y, this.player.x, this.player.y) < 200);
+                this.props.push(new Prop('cover', p.x, p.y)); 
+            }
         }
         if (this.wave % 7 === 0) {
             let bossCount = Math.floor(this.wave / 7); const scale = 1 + (bossCount * 0.25);
-            let p; do { p = this.level.getRandomFloorPoint(); } while (distance(p.x, p.y, this.player.x, this.player.y) < 400 || this.isPointOnProp(p.x, p.y, 30));
+            let p; let attempts=0; 
+            do { p = this.level.getRandomFloorPoint(); attempts++; } while (attempts<50 && (distance(p.x, p.y, this.player.x, this.player.y) < 400 || this.isPointOnProp(p.x, p.y, 30)));
             this.enemies.push(new Enemy('boss', p.x, p.y, scale)); audioSys.sfxBossSpawn(); audioSys.startBGM('boss');
         } else {
             const scale = 1 + this.wave * 0.15; const numGroups = 4 + Math.floor(this.wave / 2);
             for (let g = 0; g < numGroups; g++) {
-                let p; do { p = this.level.getRandomFloorPoint(); } while (distance(p.x, p.y, this.player.x, this.player.y) < 400 || this.isPointOnProp(p.x, p.y, 20));
+                let p; let attempts=0;
+                do { p = this.level.getRandomFloorPoint(); attempts++; } while (attempts<50 && (distance(p.x, p.y, this.player.x, this.player.y) < 400 || this.isPointOnProp(p.x, p.y, 20)));
                 let groupSize = randInt(3, 7);
                 for(let i=0; i<groupSize; i++) {
                     let type = 'basic', r = Math.random();
@@ -2329,8 +2414,8 @@ class Game {
             let mutList = document.getElementById('pauseMutationsList'); mutList.innerHTML = '<strong>Habilidades:</strong><br>';
             if(this.player.mutations.length === 0) mutList.innerHTML += 'Ninguna';
             else { this.player.mutations.forEach(mId => { let mutDef = MUTATIONS.find(m => m.id === mId); if(mutDef) mutList.innerHTML += `- ${mutDef.name}<br>`; }); }
-            this.state = 'PAUSED'; this.setUIState('pauseScreen'); 
-        } else if (this.state === 'PAUSED') { this.state = 'PLAYING'; this.setUIState(null); }
+            this.state = 'PAUSED'; this.setUIState('pauseScreen'); audioSys.startBGM('pause');
+        } else if (this.state === 'PAUSED') { this.state = 'PLAYING'; this.setUIState(null); audioSys.startBGM(this.enemies.find(e=>e.type==='boss') ? 'boss' : 'gameplay'); }
     }
 
     triggerScreenShake(mag) { this.shakeTime = 0.15; this.shakeMagnitude = mag; }
@@ -2343,25 +2428,47 @@ class Game {
             this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; audioSys.startBGM('menu');
             return;
         }
-        this.state = isWin ? 'VICTORY' : 'GAMEOVER'; const u = db.users[currentUser]; u.coins += this.runCoins; audioSys.stopBGM();
+        this.state = isWin ? 'VICTORY' : 'GAMEOVER'; const u = db.users[currentUser]; u.coins += this.runCoins; 
+        audioSys.startBGM(isWin ? 'victory' : 'death');
         let reviveBtn = document.getElementById('btnReviveAd');
         if (!isWin && this.revivesUsed === 0) reviveBtn.style.display = 'inline-block'; else reviveBtn.style.display = 'none';
         if (isWin) { u.wins++; document.getElementById('vicScore').innerText = this.score; document.getElementById('vicCoins').innerText = this.runCoins; this.setUIState('victoryScreen'); } 
         else { u.deaths++; document.getElementById('goContext').innerText = `Modo: ${this.mode} | ${this.mode==='STORY' ? 'Nivel: '+(this.levelIndex+1) : 'Oleada: '+(this.wave-1)}`; document.getElementById('goScore').innerText = this.score; document.getElementById('goCoins').innerText = this.runCoins; this.setUIState('gameOverScreen'); }
-        if(this.mode === 'STORY') checkHighscore(currentUser, this.score); saveDB(); audioSys.startBGM('menu');
+        if(this.mode === 'STORY') checkHighscore(currentUser, this.score); saveDB(); 
     }
 
     handleTutorialStep() {
         if (this.tutorialStep === 0) { if (this.tutorialMoved) this.tutorialStep = 1; } 
-        else if (this.tutorialStep === 1) { if (this.tutorialFired && this.tutorialReloaded) this.tutorialStep = 2; } 
+        else if (this.tutorialStep === 1) { 
+            if (this.tutorialFired && this.tutorialReloaded) { 
+                this.tutorialStep = 2; 
+                this.props.push(new Prop('cover', this.player.x+120, this.player.y));
+                this.props.push(new Prop('cover', this.player.x+120, this.player.y+40));
+                this.props.push(new Prop('cover', this.player.x+120, this.player.y-40));
+            } 
+        } 
         else if (this.tutorialStep === 2) {
-            if (this.tutorialDashed) { this.tutorialStep = 3; this.items.push(new Item('coin', this.player.x - 50, this.player.y)); this.items.push(new Item('heal', this.player.x + 50, this.player.y)); this.player.hp = 50; }
-        } else if (this.tutorialStep === 3) { if (this.items.length === 0) { this.tutorialStep = 4; } } 
-        else if (this.tutorialStep === 4) {
+            if (this.tutorialDashed) { 
+                this.tutorialStep = 3; 
+                let e = new Enemy('basic', this.player.x + 100, this.player.y, 1);
+                e.hp = 100; e.maxHp = 100; e.speed = 0; e.damage = 0; this.enemies.push(e);
+            }
+        } 
+        else if (this.tutorialStep === 3) { 
+            if (this.tutorialMeleed) { 
+                this.tutorialStep = 4;
+                this.enemies = []; 
+                this.items.push(new Item('coin', this.player.x - 50, this.player.y)); 
+                this.items.push(new Item('heal', this.player.x + 50, this.player.y)); 
+                this.player.hp = 50;
+            } 
+        } 
+        else if (this.tutorialStep === 4) { if (this.items.length === 0) { this.tutorialStep = 5; } } 
+        else if (this.tutorialStep === 5) {
             if (!this.tutorialCombatStarted) {
                 this.tutorialCombatStarted = true;
                 for(let i=0; i<3; i++) { let e = new Enemy('basic', this.player.x + randRange(-100, 100), this.player.y - 150 + randRange(-50,50), 1); e.hp = 10; e.maxHp = 10; e.damage = 2; e.speed = 40; this.enemies.push(e); }
-            } else if (this.enemies.length === 0) { this.tutorialStep = 5; this.fadeState = 'TUTORIAL_END'; this.fadeTimer = 3.0; }
+            } else if (this.enemies.length === 0) { this.tutorialStep = 6; this.fadeState = 'TUTORIAL_END'; this.fadeTimer = 3.0; }
         }
     }
 
@@ -2385,13 +2492,24 @@ class Game {
         if(this.state !== 'PLAYING') {
             if(gpJustDown(12)) this.moveNav(-1); 
             if(gpJustDown(13)) this.moveNav(1); 
-            if(gpJustDown(14)) this.moveNav(-1); 
-            if(gpJustDown(15)) this.moveNav(1); 
+            if(gpJustDown(14)) {
+                if (this.state === 'SETTINGS' && this.navElements[this.navIndex] && this.navElements[this.navIndex].type === 'range') {
+                    this.navElements[this.navIndex].value = Math.max(0, parseInt(this.navElements[this.navIndex].value) - 10);
+                    this.navElements[this.navIndex].dispatchEvent(new Event('input'));
+                } else this.moveNav(-1); 
+            }
+            if(gpJustDown(15)) {
+                if (this.state === 'SETTINGS' && this.navElements[this.navIndex] && this.navElements[this.navIndex].type === 'range') {
+                    this.navElements[this.navIndex].value = Math.min(100, parseInt(this.navElements[this.navIndex].value) + 10);
+                    this.navElements[this.navIndex].dispatchEvent(new Event('input'));
+                } else this.moveNav(1); 
+            }
             if(gpJustDown(0)) this.triggerNavEnter();
             if(gpJustDown(1)) { 
                 if(this.state === 'STORE') document.getElementById('btnBackToMenuPC').click(); 
                 if(this.state === 'PILOTS') document.getElementById('btnPilotsBack').click(); 
                 if(this.state === 'LIBRARY') document.getElementById('btnLibraryBack').click(); 
+                if(this.state === 'SETTINGS') document.getElementById('btnSoundBack').click(); 
             }
         } else {
             if(gpJustDown(9)) this.togglePause();
@@ -2489,7 +2607,7 @@ class Game {
 
         if (this.mode === 'STORY' && activeEnemies === 0) {
             if (this.levelIndex === this.targetLevels - 1 && !this.bossSpawned) {
-                this.bossSpawned = true; let p; do { p = this.level.getRandomFloorPoint(); } while(distance(p.x, p.y, this.player.x, this.player.y) < 300 || this.isPointOnProp(p.x, p.y, 30));
+                this.bossSpawned = true; let p; let attempts=0; do { p = this.level.getRandomFloorPoint(); attempts++; } while(attempts<50 && (distance(p.x, p.y, this.player.x, this.player.y) < 300 || this.isPointOnProp(p.x, p.y, 30)));
                 this.enemies.push(new Enemy('boss', p.x, p.y, 1 + this.levelIndex * 0.2)); audioSys.sfxBossSpawn(); audioSys.startBGM('boss');
             } else if (!this.portal && (this.levelIndex < this.targetLevels - 1 || this.bossSpawned)) {
                 let px = this.player.x, py = this.player.y, valid = false, prx, pry;
@@ -2550,7 +2668,7 @@ class Game {
 
     draw() {
         this.ctx.fillStyle = '#050508'; this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        if (this.state === 'LOGIN' || this.state === 'MENU' || this.state === 'STORE' || this.state === 'PILOTS' || this.state === 'LIBRARY') return;
+        if (this.state === 'LOGIN' || this.state === 'MENU' || this.state === 'STORE' || this.state === 'PILOTS' || this.state === 'LIBRARY' || this.state === 'SETTINGS') return;
 
         if (this.state === 'INTRO') {
             this.ctx.fillStyle = '#000'; this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -2606,12 +2724,13 @@ class Game {
         if (this.mode === 'TUTORIAL') {
             this.ctx.textAlign = 'center'; this.ctx.fillStyle = '#fff'; this.ctx.shadowBlur = 5; this.ctx.shadowColor = '#000'; this.ctx.font = 'bold 16px Courier New';
             let tutText = "";
-            if (this.tutorialStep === 0) tutText = isMobileMode ? "Usa el joystick izquierdo para moverte" : "Usa W A S D para moverte";
-            else if (this.tutorialStep === 1) tutText = isMobileMode ? "Usa el botón X o joystick der. para disparar, R para recargar" : "Apunta y usa Click para disparar, R para recargar";
-            else if (this.tutorialStep === 2) tutText = isMobileMode ? "Usa el botón D para hacer Dash (esquivar)" : "Usa SHIFT para hacer Dash (esquivar y atravesar cosas)";
-            else if (this.tutorialStep === 3) tutText = "Recoge los ítems para recuperar HP o ganar créditos";
-            else if (this.tutorialStep === 4) tutText = "¡Elimina a todos los objetivos!";
-            else if (this.tutorialStep === 5) tutText = "¡Tutorial completado!";
+            if (this.tutorialStep === 0) tutText = isMobileMode ? "Usa el joystick izq. para moverte" : "Usa W A S D para moverte";
+            else if (this.tutorialStep === 1) tutText = isMobileMode ? "Botón X para disparar, R recargar" : "Apunta y Click para disparar, R para recargar";
+            else if (this.tutorialStep === 2) tutText = isMobileMode ? "Botón D para atravesar obstáculos (Dash)" : "SHIFT para atravesar obstáculos (Dash)";
+            else if (this.tutorialStep === 3) tutText = isMobileMode ? "Botón F para empujar (Cuerpo a cuerpo)" : "Botón F para empujar (Cuerpo a cuerpo)";
+            else if (this.tutorialStep === 4) tutText = "Recoge los ítems";
+            else if (this.tutorialStep === 5) tutText = "¡Elimina a todos los objetivos!";
+            else if (this.tutorialStep === 6) tutText = "¡Tutorial completado!";
             this.ctx.fillText(tutText, this.player.x, this.player.y - 40); this.ctx.shadowBlur = 0; this.ctx.textAlign = 'left';
         }
 
