@@ -77,13 +77,15 @@
         .sm { width: 45px; height: 18px; font-size: 10px; border-radius: 10px; background: #444; color: #aaa; border: 2px solid #222; }
         #joystickBase { position: absolute; left: 5%; top: 35%; transform: translateY(-50%); width: 140px; height: 140px; background: rgba(0,0,0,0.1); border: 3px solid #777; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
         #joystickStick { position: absolute; width: 60px; height: 60px; background: #333; border-radius: 50%; left: 50%; top: 50%; transform: translate(-50%, -50%); box-shadow: 2px 4px 0 #111; }
-        #mobileShoot { bottom: 25%; right: 10%; background: #aa0033; }
+        
+        #mobileShoot { bottom: 20%; right: 15%; background: #aa0033; }
         #mobilePause { top: 10px; right: 10px; border-radius: 5px; width: 60px; height: 30px; font-size: 12px; }
         #mobilePause:active { transform: translateY(4px); }
-        #mobileReload { bottom: 45%; right: 28%; background: #00aa55; }
-        #mobileDash { bottom: 20%; right: 42%; background: #0055aa; }
-        #mobileInteract { bottom: 8%; right: 10%; background: #ffaa00; display: none; }
-        #mobileMelee { bottom: 45%; right: 10%; background: #ff8800; }
+        #mobileReload { bottom: 35%; right: 30%; background: #00aa55; }
+        #mobileDash { bottom: 20%; right: 30%; background: #0055aa; }
+        #mobileMelee { bottom: 35%; right: 15%; background: #ff8800; }
+        #mobileInteract { bottom: 5%; right: 15%; background: #ffaa00; display: none; }
+        
         #dpadNav { position: absolute; left: 10%; top: 40%; transform: translateY(-50%); width: 120px; height: 120px; }
         .dpad-btn { position: absolute; background: #333; color: #fff; border: 2px solid #111; width: 40px; height: 40px; font-size: 18px; display: flex; justify-content: center; align-items: center; box-shadow: 2px 2px 0 #111; padding:0; margin:0; border-radius: 4px; }
         .dpad-btn:active { transform: translate(2px, 2px); box-shadow: none; }
@@ -237,58 +239,106 @@ const CANVAS_WIDTH = 1024, CANVAS_HEIGHT = 768, TILE_SIZE = 64;
 
 const SPRITE_DATA = {
     player_tank: [
-        "      0000      ",
-        "    00cccc00    ",
-        "   0cccccccc0   ",
-        "  0cccccccccc0  ",
-        "  0cccccccccc0  ",
-        " 0cc00000000cc0 ",
-        " 0c0dddddddd0c0 ",
-        " 0c0dddddddd0c0 ",
-        " 0c0dddddddd0c0 ",
-        " 0cc00000000cc0 ",
-        " 0cccccccccccc0 ",
-        "  0cccccccccc0  ",
-        "  00ccc00ccc00  ",
-        "   0ccc00ccc0   ",
-        "   0000  0000   ",
-        "                "
+        "                                ",
+        "                                ",
+        "            00000000            ",
+        "          00cccccccc00          ",
+        "         0cccccccccccc0         ",
+        "        0cccccccccccccc0        ",
+        "       0cccccccccccccccc0       ",
+        "       0cccccccccccccccc0       ",
+        "      0cc00000000000000cc0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0cc00000000000000cc0      ",
+        "      0cccccccccccccccc0c0      ",
+        "      0cccccccccccccccc0c0      ",
+        "       0cccccccccccccc000       ",
+        "        0cccccccccccc0          ",
+        "        000cccc00cccc00         ",
+        "          0cccc00cccc0          ",
+        "          0cccc00cccc0          ",
+        "          00000  00000          ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                "
     ],
     player_tank_walk: [
-        "      0000      ",
-        "    00cccc00    ",
-        "   0cccccccc0   ",
-        "  0cccccccccc0  ",
-        "  0cccccccccc0  ",
-        " 0cc00000000cc0 ",
-        " 0c0dddddddd0c0 ",
-        " 0c0dddddddd0c0 ",
-        " 0c0dddddddd0c0 ",
-        " 0cc00000000cc0 ",
-        " 0cccccccccccc0 ",
-        "  0cccccccccc0  ",
-        "   0ccc00ccc00  ",
-        "   0000 0ccc0   ",
-        "         0000   ",
-        "                "
+        "                                ",
+        "                                ",
+        "            00000000            ",
+        "          00cccccccc00          ",
+        "         0cccccccccccc0         ",
+        "        0cccccccccccccc0        ",
+        "       0cccccccccccccccc0       ",
+        "       0cccccccccccccccc0       ",
+        "      0cc00000000000000cc0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0c0dddddddddddddd0c0      ",
+        "      0cc00000000000000cc0      ",
+        "      0cccccccccccccccc0c0      ",
+        "      0cccccccccccccccc0c0      ",
+        "       0cccccccccccccc000       ",
+        "        0cccccccccccc0          ",
+        "         00cccc00cccc00         ",
+        "          00000 0cccc0          ",
+        "                0cccc0          ",
+        "                00000           ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                "
     ],
     player_tank_dead: [
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "       000      ",
-        "     00ccc00    ",
-        "    0c0cdddc0   ",
-        "   0cc0ccdddc0  ",
-        "   0cc0cccccc0  ",
-        "    0c0cccc00   ",
-        "     00cccc0    ",
-        "      0cccc0    ",
-        "     0cc00cc0   ",
-        "    0000  0000  ",
-        "                "
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "              000000            ",
+        "            00cccccc00          ",
+        "           0c0ccddddcc0         ",
+        "          0cc0ccccddddc0        ",
+        "          0cc0cccccccccc0       ",
+        "           0c0cccccccc00        ",
+        "            00cccccccc0         ",
+        "             0cccccccc0         ",
+        "            0ccc000ccc0         ",
+        "           00000   00000        ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                "
     ],
     player_assassin: [
         "      0000      ",
@@ -399,22 +449,38 @@ const SPRITE_DATA = {
         "                "
     ],
     enemy_basic: [
-        "                ",
-        "      0000      ",
-        "     055550     ",
-        "    05555550    ",
-        "   0505555050   ",
-        "   0500550050   ",
-        "   0555555550   ",
-        "    05500550    ",
-        "    00555500    ",
-        "   0555555550   ",
-        "   0555555550   ",
-        "   0055005500   ",
-        "    05500550    ",
-        "    000  000    ",
-        "                ",
-        "                "
+        "                                ",
+        "                                ",
+        "            00000000            ",
+        "          005555555500          ",
+        "         05555555555550         ",
+        "        0550055555500550        ",
+        "        0550055555500550        ",
+        "       055000055550000550       ",
+        "       055000055550000550       ",
+        "       055555555555555550       ",
+        "       055555555555555550       ",
+        "        0555500000055550        ",
+        "        0555500000055550        ",
+        "        0005555555555000        ",
+        "       055555555555555550       ",
+        "       055555555555555550       ",
+        "       055555555555555550       ",
+        "       055555555555555550       ",
+        "       000555500005555000       ",
+        "       000555500005555000       ",
+        "        0555500000055550        ",
+        "        0555500000055550        ",
+        "        00000  00  00000        ",
+        "        00000  00  00000        ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                "
     ],
     enemy_basic_dead: [
         "                ",
@@ -981,6 +1047,21 @@ window.renderedSprites = {};
 function initSprites() {
     for(let key in SPRITE_DATA) {
         let data = SPRITE_DATA[key];
+        
+        if (data.length === 16 && data[0].length === 16) {
+            let upscaled = [];
+            for (let y = 0; y < 16; y++) {
+                let row = "";
+                for (let x = 0; x < 16; x++) {
+                    row += data[y][x] + data[y][x];
+                }
+                upscaled.push(row);
+                upscaled.push(row);
+            }
+            data = upscaled;
+            SPRITE_DATA[key] = upscaled;
+        }
+
         let canvas = document.createElement('canvas');
         canvas.width = data[0].length;
         canvas.height = data.length;
@@ -1125,7 +1206,7 @@ class AudioSystem {
         else if (type === 'pause') { this.bgmOsc.type = 'sine'; seq = [220, 220]; speed = 1000; }
         else if (type === 'death') { this.bgmOsc.type = 'sawtooth'; seq = [200, 180, 160, 140, 120, 100, 80, 60]; speed = 300; }
         else if (type === 'victory') { this.bgmOsc.type = 'square'; seq = [392, 493.88, 587.33, 783.99]; speed = 150; }
-        else if (type === 'tutorial') { this.bgmOsc.type = 'sine'; seq = [261.63, 349.23, 392.00, 523.25, 392.00, 349.23]; speed = 600; }
+        else if (type === 'tutorial') { this.bgmOsc.type = 'sine'; seq = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63]; speed = 600; }
         
         this.bgmOsc.start();
         this.bgmInterval = setInterval(() => {
@@ -1508,7 +1589,7 @@ class Player {
         if (game.input.keys['ShiftLeft'] && this.dashCooldownTimer <= 0 && !this.isDashing) {
             this.isDashing = true; this.dashTimer = 0.2; this.dashCooldownTimer = this.dashCooldown; this.invulnerableTimer = 0.2;
             game.spawnParticles(this.x, this.y, '#0055aa', 20);
-            if(game.mode === 'TUTORIAL') game.tutorialDashed = true;
+            if(game.mode === 'TUTORIAL') { game.tutorialDashed = true; audioSys.sfxHit(); }
         }
 
         if (game.input.keys['KeyF'] && this.meleeTimer <= 0) {
@@ -1534,7 +1615,7 @@ class Player {
         this.isMoving = Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1;
         if (this.isMoving) { 
             const len = Math.hypot(dx, dy); dx /= len; dy /= len; 
-            if(game.mode === 'TUTORIAL') game.tutorialMoved = true;
+            if(game.mode === 'TUTORIAL' && !game.tutorialMoved) { game.tutorialMoved = true; audioSys.sfxCoin(); }
             if(!this.isDashing) {
                 this.footstepTimer -= dt;
                 if(this.footstepTimer <= 0) { audioSys.sfxFootstep(); this.footstepTimer = 0.35; }
@@ -2424,7 +2505,7 @@ class Game {
             if(this.player.mutations.length === 0) mutList.innerHTML += 'Ninguna';
             else { this.player.mutations.forEach(mId => { let mutDef = MUTATIONS.find(m => m.id === mId); if(mutDef) mutList.innerHTML += `- ${mutDef.name}<br>`; }); }
             this.state = 'PAUSED'; this.setUIState('pauseScreen'); audioSys.startBGM('pause');
-        } else if (this.state === 'PAUSED') { this.state = 'PLAYING'; this.setUIState(null); audioSys.startBGM(this.enemies.find(e=>e.type==='boss') ? 'boss' : 'gameplay'); }
+        } else if (this.state === 'PAUSED') { this.state = 'PLAYING'; this.setUIState(null); audioSys.startBGM(this.enemies.find(e=>e.type==='boss') ? 'boss' : (this.mode === 'TUTORIAL' ? 'tutorial' : 'gameplay')); }
     }
 
     triggerScreenShake(mag) { this.shakeTime = 0.15; this.shakeMagnitude = mag; }
@@ -2447,10 +2528,11 @@ class Game {
     }
 
     handleTutorialStep() {
-        if (this.tutorialStep === 0) { if (this.tutorialMoved) this.tutorialStep = 1; } 
+        if (this.tutorialStep === 0) { if (this.tutorialMoved) { this.tutorialStep = 1; audioSys.sfxCoin(); } } 
         else if (this.tutorialStep === 1) { 
             if (this.tutorialFired && this.tutorialReloaded) { 
                 this.tutorialStep = 2; 
+                audioSys.sfxCoin();
                 this.props.push(new Prop('cover', this.player.x+120, this.player.y));
                 this.props.push(new Prop('cover', this.player.x+120, this.player.y+40));
                 this.props.push(new Prop('cover', this.player.x+120, this.player.y-40));
@@ -2459,6 +2541,7 @@ class Game {
         else if (this.tutorialStep === 2) {
             if (this.tutorialDashed) { 
                 this.tutorialStep = 3; 
+                audioSys.sfxCoin();
                 let e = new Enemy('basic', this.player.x + 100, this.player.y, 1);
                 e.hp = 100; e.maxHp = 100; e.speed = 0; e.damage = 0; this.enemies.push(e);
             }
@@ -2466,18 +2549,19 @@ class Game {
         else if (this.tutorialStep === 3) { 
             if (this.tutorialMeleed) { 
                 this.tutorialStep = 4;
+                audioSys.sfxCoin();
                 this.enemies = []; 
                 this.items.push(new Item('coin', this.player.x - 50, this.player.y)); 
                 this.items.push(new Item('heal', this.player.x + 50, this.player.y)); 
                 this.player.hp = 50;
             } 
         } 
-        else if (this.tutorialStep === 4) { if (this.items.length === 0) { this.tutorialStep = 5; } } 
+        else if (this.tutorialStep === 4) { if (this.items.length === 0) { this.tutorialStep = 5; audioSys.sfxCoin(); } } 
         else if (this.tutorialStep === 5) {
             if (!this.tutorialCombatStarted) {
                 this.tutorialCombatStarted = true;
                 for(let i=0; i<3; i++) { let e = new Enemy('basic', this.player.x + randRange(-100, 100), this.player.y - 150 + randRange(-50,50), 1); e.hp = 10; e.maxHp = 10; e.damage = 2; e.speed = 40; this.enemies.push(e); }
-            } else if (this.enemies.length === 0) { this.tutorialStep = 6; this.fadeState = 'TUTORIAL_END'; this.fadeTimer = 3.0; }
+            } else if (this.enemies.length === 0) { this.tutorialStep = 6; audioSys.sfxCoin(); this.fadeState = 'TUTORIAL_END'; this.fadeTimer = 3.0; }
         }
     }
 
