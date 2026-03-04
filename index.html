@@ -82,8 +82,8 @@
         #mobilePause:active { transform: translateY(4px); }
         #mobileReload { bottom: 45%; right: 28%; background: #00aa55; }
         #mobileDash { bottom: 20%; right: 42%; background: #0055aa; }
-        #mobileInteract { bottom: 50%; right: 10%; background: #ffaa00; display: none; }
-        #mobileMelee { bottom: 65%; right: 12%; background: #ff8800; }
+        #mobileInteract { bottom: 8%; right: 10%; background: #ffaa00; display: none; }
+        #mobileMelee { bottom: 45%; right: 10%; background: #ff8800; }
         #dpadNav { position: absolute; left: 10%; top: 40%; transform: translateY(-50%); width: 120px; height: 120px; }
         .dpad-btn { position: absolute; background: #333; color: #fff; border: 2px solid #111; width: 40px; height: 40px; font-size: 18px; display: flex; justify-content: center; align-items: center; box-shadow: 2px 2px 0 #111; padding:0; margin:0; border-radius: 4px; }
         .dpad-btn:active { transform: translate(2px, 2px); box-shadow: none; }
@@ -1125,6 +1125,7 @@ class AudioSystem {
         else if (type === 'pause') { this.bgmOsc.type = 'sine'; seq = [220, 220]; speed = 1000; }
         else if (type === 'death') { this.bgmOsc.type = 'sawtooth'; seq = [200, 180, 160, 140, 120, 100, 80, 60]; speed = 300; }
         else if (type === 'victory') { this.bgmOsc.type = 'square'; seq = [392, 493.88, 587.33, 783.99]; speed = 150; }
+        else if (type === 'tutorial') { this.bgmOsc.type = 'sine'; seq = [261.63, 349.23, 392.00, 523.25, 392.00, 349.23]; speed = 600; }
         
         this.bgmOsc.start();
         this.bgmInterval = setInterval(() => {
@@ -2025,8 +2026,12 @@ class Game {
                 if(cIdx >= 0) this.selectedPilotClassIdx = cIdx;
                 if (!db.users[currentUser].discoveredEnemies) { db.users[currentUser].discoveredEnemies = []; saveDB(); }
 
-                if (isNewUser || !db.users[currentUser].tutorialDone) { this.setUIState(null); this.state = 'INTRO'; this.introTimer = 7.0; } 
-                else { this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; audioSys.init(); audioSys.startBGM('menu'); }
+                if (isNewUser || !db.users[currentUser].tutorialDone) {
+                    audioSys.init();
+                    this.setUIState(null); this.state = 'INTRO'; this.introTimer = 7.0;
+                } else {
+                    this.updateMenuUI(); this.setUIState('menuScreen'); this.state = 'MENU'; audioSys.init(); audioSys.startBGM('menu');
+                }
             }
         };
         document.getElementById('btnLogout').onclick = () => { currentUser = null; document.getElementById('passwordInput').value=''; this.setUIState('loginScreen'); this.state='LOGIN'; audioSys.stopBGM(); };
@@ -2310,7 +2315,7 @@ class Game {
     startTutorial() {
         this.mode = 'TUTORIAL'; this.resetGameData();
         this.player = new Player(0, 0, WEAPONS['w1'], PILOT_CLASSES[0]);
-        this.setUIState(null); this.state = 'PLAYING'; audioSys.startBGM('gameplay');
+        this.setUIState(null); this.state = 'PLAYING'; audioSys.startBGM('tutorial');
         this.level = new Level(0, 'STORY', true);
         const spawn = this.level.getSpawnPoint(); this.player.x = spawn.x; this.player.y = spawn.y;
     }
