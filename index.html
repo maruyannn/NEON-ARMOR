@@ -903,33 +903,8 @@ function initSprites() {
             for(let x=0; x<w; x++) {
                 let c = data[y][x];
                 if(c !== ' ') {
-                    let color = SPRITE_COLORS[c];
-                    let px = x * SCALE;
-                    let py = y * SCALE;
-
-                    ctx.fillStyle = color;
-                    ctx.fillRect(px, py, SCALE, SCALE);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-                    ctx.fillRect(px, py, SCALE, Math.ceil(SCALE*0.25));
-                    ctx.fillRect(px, py, Math.ceil(SCALE*0.25), SCALE);
-
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-                    ctx.fillRect(px, py + SCALE - Math.ceil(SCALE*0.25), SCALE, Math.ceil(SCALE*0.25));
-                    ctx.fillRect(px + SCALE - Math.ceil(SCALE*0.25), py, Math.ceil(SCALE*0.25), SCALE);
-                }
-            }
-        }
-        
-        for(let y=0; y<h; y++) {
-            for(let x=0; x<w; x++) {
-                if(data[y][x] !== ' ') {
-                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    let px = x * SCALE, py = y * SCALE;
-                    if(y===0 || data[y-1][x] === ' ') ctx.fillRect(px, py, SCALE, 1);
-                    if(y===h-1 || data[y+1][x] === ' ') ctx.fillRect(px, py + SCALE - 1, SCALE, 1);
-                    if(x===0 || data[y][x-1] === ' ') ctx.fillRect(px, py, 1, SCALE);
-                    if(x===w-1 || data[y][x+1] === ' ') ctx.fillRect(px + SCALE - 1, py, 1, SCALE);
+                    ctx.fillStyle = SPRITE_COLORS[c];
+                    ctx.fillRect(x * SCALE, y * SCALE, SCALE, SCALE);
                 }
             }
         }
@@ -2496,11 +2471,12 @@ class Game {
             this.flowTimer = 0.25; 
         }
 
+        let camZoom = isMobileMode ? 1.5 : 1;
         if (this.levelIndex >= 3 && this.mode === 'STORY' && Math.random() < dt * 2) {
-            game.customParticles.push({ type: 'acidRain', x: this.camera.x + Math.random()*CANVAS_WIDTH, y: this.camera.y - 20, vx: 50, vy: 400, life: 2.0 });
+            this.customParticles.push({ type: 'acidRain', x: this.camera.x + Math.random()*(CANVAS_WIDTH/camZoom), y: this.camera.y - 20, vx: 50, vy: 400, life: 2.0 });
         }
         if (this.levelIndex >= 6 && this.mode === 'STORY' && Math.random() < dt) {
-            game.customParticles.push({ type: 'spark', x: this.player.x + randRange(-300,300), y: this.player.y + randRange(-300,300), life: 0.1 });
+            this.customParticles.push({ type: 'spark', x: this.player.x + randRange(-300,300), y: this.player.y + randRange(-300,300), life: 0.1 });
         }
 
         this.nearStash = false;
@@ -2514,7 +2490,7 @@ class Game {
         }
 
         if(!this.player.active) { this.player.deadTimer += dt; if(this.player.deadTimer > 2.0) { this.endRun(false); return; } } 
-        else { this.player.update(dt, this, this.level); let camZoom = isMobileMode ? 1.5 : 1; this.camera.x = this.player.x - (CANVAS_WIDTH / camZoom) / 2; this.camera.y = this.player.y - (CANVAS_HEIGHT / camZoom) / 2; }
+        else { this.player.update(dt, this, this.level); this.camera.x = this.player.x - (CANVAS_WIDTH / camZoom) / 2; this.camera.y = this.player.y - (CANVAS_HEIGHT / camZoom) / 2; }
 
         if(this.mode === 'SURVIVAL') { 
             if(this.enemies.length === 0) {
