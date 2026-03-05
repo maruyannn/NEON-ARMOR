@@ -274,24 +274,6 @@ const SPRITE_DATA = {
         "         0000   ",
         "                "
     ],
-    player_tank_dead: [
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "       000      ",
-        "     00ccc00    ",
-        "    0c0cdddc0   ",
-        "   0cc0ccdddc0  ",
-        "   0cc0cccccc0  ",
-        "    0c0cccc00   ",
-        "     00cccc0    ",
-        "      0cccc0    ",
-        "     0cc00cc0   ",
-        "    0000  0000  ",
-        "                "
-    ],
     player_assassin: [
         "      0000      ",
         "    00999900    ",
@@ -326,24 +308,6 @@ const SPRITE_DATA = {
         "   09990099900  ",
         "   0000 09990   ",
         "         0000   ",
-        "                "
-    ],
-    player_assassin_dead: [
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "       000      ",
-        "     0099900    ",
-        "    090955590   ",
-        "   09909955590  ",
-        "   09909999990  ",
-        "    090999900   ",
-        "     0099990    ",
-        "      099990    ",
-        "     09900990   ",
-        "    0000  0000  ",
         "                "
     ],
     player_engineer: [
@@ -382,24 +346,6 @@ const SPRITE_DATA = {
         "         0000   ",
         "                "
     ],
-    player_engineer_dead: [
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "       000      ",
-        "     0088800    ",
-        "    080877780   ",
-        "   08808877780  ",
-        "   08808888880  ",
-        "    080888800   ",
-        "     0088880    ",
-        "      088880    ",
-        "     08800880   ",
-        "    0000  0000  ",
-        "                "
-    ],
     enemy_basic: [
         "                ",
         "      0000      ",
@@ -417,24 +363,6 @@ const SPRITE_DATA = {
         "    000  000    ",
         "                ",
         "                "
-    ],
-    enemy_basic_dead: [
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "      0000      ",
-        "    00555500    ",
-        "   0550550550   ",
-        "  055555555550  ",
-        "  005500005500  ",
-        "   000    000   "
     ],
     enemy_fast: [
         "                ",
@@ -454,23 +382,23 @@ const SPRITE_DATA = {
         "                ",
         "                "
     ],
-    enemy_fast_dead: [
+    enemy_acid: [
+        "      0000      ",
+        "     077770     ",
+        "    07777770    ",
+        "   0700770070   ",
+        "   0707777070   ",
+        "   0777777770   ",
+        "    07777770    ",
+        "    00777700    ",
+        "   0777777770   ",
+        "   0777777770   ",
+        "  077700007770  ",
+        "  0770    0770  ",
+        "  000      000  ",
         "                ",
         "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "       00       ",
-        "     00bb00     ",
-        "    0bb00bb0    ",
-        "   0bbbbbbbb0   ",
-        "   00bb00bb00   ",
-        "    000  000    "
+        "                "
     ],
     enemy_ghost: [
         "                ",
@@ -526,24 +454,6 @@ const SPRITE_DATA = {
         "                ",
         "                "
     ],
-    enemy_tank_dead: [
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "      0000      ",
-        "    00aaaa00    ",
-        "   0dd0aa0dd0   ",
-        "  0dddaaaaddd0  ",
-        "  0ddaaaaaadd0  ",
-        "   0da0000ad0   ",
-        "   0aa0  0aa0   ",
-        "   000    000   "
-    ],
     enemy_summoner: [
         "      0000      ",
         "     099990     ",
@@ -598,42 +508,6 @@ const SPRITE_DATA = {
         "                ",
         "                "
     ],
-    enemy_acid: [
-        "      0000      ",
-        "     077770     ",
-        "    07777770    ",
-        "   0707777070   ",
-        "   0700770070   ",
-        "   0777777770   ",
-        "    07777770    ",
-        "    00777700    ",
-        "   0777777770   ",
-        "   0777777770   ",
-        "   0077007700   ",
-        "    07700770    ",
-        "    000  000    ",
-        "                ",
-        "                ",
-        "                "
-    ],
-    enemy_acid_dead: [
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "      0000      ",
-        "    00777700    ",
-        "   0770770770   ",
-        "  077777777770  ",
-        "  007700007700  ",
-        "   000    000   "
-    ],
     enemy_boss: [
         "  00        00  ",
         " 0aa0      0aa0 ",
@@ -669,24 +543,6 @@ const SPRITE_DATA = {
         " 000      000   ",
         "                ",
         "                "
-    ],
-    enemy_boss_dead: [
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "                ",
-        "  00        00  ",
-        " 0aa0      0aa0 ",
-        "  0a00000000a0  ",
-        "  0aa00aa00aa0  ",
-        " 0aaaaaaaaaaaa0 ",
-        "  00aaaaaa0000  ",
-        "   0aa0  0aa0   ",
-        "   000    000   "
     ],
     crate: [
         "  000000000000  ",
@@ -1017,39 +873,63 @@ const SPRITE_COLORS = {
 
 window.renderedSprites = {};
 function initSprites() {
+    const SCALE = 4;
+    
+    let toAdd = {};
+    for (let key in SPRITE_DATA) {
+        if (!key.includes('_dead') && !SPRITE_DATA[key + '_dead']) {
+            let data = SPRITE_DATA[key];
+            let deadData = [];
+            let half = Math.floor(data.length / 2);
+            for(let i=0; i<data.length; i++) {
+                if (i < half) deadData.push(" ".repeat(data[i].length));
+                else deadData.push(data[i]);
+            }
+            toAdd[key + '_dead'] = deadData;
+        }
+    }
+    Object.assign(SPRITE_DATA, toAdd);
+
     for(let key in SPRITE_DATA) {
         let data = SPRITE_DATA[key];
-        let upscaled = [];
-        let targetSize = 64;
-        let currentHeight = data.length;
-        let currentWidth = data[0].length;
-        
-        if (currentHeight <= targetSize && currentWidth <= targetSize) {
-            let scaleY = Math.floor(targetSize / currentHeight);
-            let scaleX = Math.floor(targetSize / currentWidth);
-            if(scaleX > 1 || scaleY > 1) {
-                for (let y = 0; y < currentHeight; y++) {
-                    let row = "";
-                    for (let x = 0; x < currentWidth; x++) {
-                        for(let i=0; i<scaleX; i++) row += data[y][x];
-                    }
-                    for(let i=0; i<scaleY; i++) upscaled.push(row);
-                }
-                data = upscaled;
-                SPRITE_DATA[key] = upscaled;
-            }
-        }
-
         let canvas = document.createElement('canvas');
-        canvas.width = data[0].length;
-        canvas.height = data.length;
+        let w = data[0].length;
+        let h = data.length;
+        canvas.width = w * SCALE;
+        canvas.height = h * SCALE;
         let ctx = canvas.getContext('2d');
-        for(let y=0; y<data.length; y++) {
-            for(let x=0; x<data[y].length; x++) {
+
+        for(let y=0; y<h; y++) {
+            for(let x=0; x<w; x++) {
                 let c = data[y][x];
                 if(c !== ' ') {
-                    ctx.fillStyle = SPRITE_COLORS[c];
-                    ctx.fillRect(x, y, 1, 1);
+                    let color = SPRITE_COLORS[c];
+                    let px = x * SCALE;
+                    let py = y * SCALE;
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(px, py, SCALE, SCALE);
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                    ctx.fillRect(px, py, SCALE, Math.ceil(SCALE*0.25));
+                    ctx.fillRect(px, py, Math.ceil(SCALE*0.25), SCALE);
+
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                    ctx.fillRect(px, py + SCALE - Math.ceil(SCALE*0.25), SCALE, Math.ceil(SCALE*0.25));
+                    ctx.fillRect(px + SCALE - Math.ceil(SCALE*0.25), py, Math.ceil(SCALE*0.25), SCALE);
+                }
+            }
+        }
+        
+        for(let y=0; y<h; y++) {
+            for(let x=0; x<w; x++) {
+                if(data[y][x] !== ' ') {
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    let px = x * SCALE, py = y * SCALE;
+                    if(y===0 || data[y-1][x] === ' ') ctx.fillRect(px, py, SCALE, 1);
+                    if(y===h-1 || data[y+1][x] === ' ') ctx.fillRect(px, py + SCALE - 1, SCALE, 1);
+                    if(x===0 || data[y][x-1] === ' ') ctx.fillRect(px, py, 1, SCALE);
+                    if(x===w-1 || data[y][x+1] === ' ') ctx.fillRect(px + SCALE - 1, py, 1, SCALE);
                 }
             }
         }
@@ -1682,35 +1562,17 @@ class Player {
     draw(ctx, time) {
         ctx.save(); ctx.translate(this.x, this.y);
         let baseName = 'player_' + this.pClass.id;
-        
-        let walkCycle = (time / 150);
-        let facingLeft = Math.cos(this.angle) < 0;
-
         if (!this.active) {
             let sprite = window.renderedSprites[baseName + '_dead'];
             if(sprite) ctx.drawImage(sprite, -this.radius*1.5, -this.radius*1.5, this.radius*3, this.radius*3);
         } else {
-            let f1 = this.isMoving ? Math.sin(walkCycle)*6 : 0;
-            let f2 = this.isMoving ? Math.cos(walkCycle)*6 : 0;
-            ctx.fillStyle = '#111';
-            ctx.beginPath(); ctx.arc(-6 + (facingLeft ? f1 : f2), this.radius - 2, 4, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(6 + (facingLeft ? f2 : f1), this.radius - 2, 4, 0, Math.PI*2); ctx.fill();
-
+            let facingLeft = Math.cos(this.angle) < 0;
             ctx.save(); ctx.scale(facingLeft ? -1 : 1, 1);
             if (this.invulnerableTimer > 0 && Math.floor(this.invulnerableTimer * 20) % 2 === 0) ctx.globalAlpha = 0.5;
             let sprite = window.renderedSprites[baseName];
             if (this.isMoving && Math.floor(time / 150) % 2 === 0) sprite = window.renderedSprites[baseName + '_walk'];
             if(sprite) ctx.drawImage(sprite, -this.radius*1.5, -this.radius*1.5, this.radius*3, this.radius*3);
             ctx.restore();
-
-            let h1 = this.isMoving ? Math.sin(walkCycle)*3 : 0;
-            ctx.save(); ctx.rotate(this.angle);
-            if (Math.abs(this.angle) > Math.PI / 2) ctx.scale(1, -1);
-            ctx.fillStyle = '#00ffcc';
-            ctx.beginPath(); ctx.arc(10, 6 + h1, 3, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(18, -2 + h1, 3, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-
             this.weapon.draw(ctx, 0, 0, this.angle);
         }
         ctx.restore();
@@ -1872,16 +1734,7 @@ class Enemy {
         }
     }
     draw(ctx, time, game) {
-        ctx.save(); ctx.translate(this.x, this.y); 
-        
-        let walkCycle = (time / 150);
-        let f1 = this.isMoving ? Math.sin(walkCycle)*4 : 0;
-        let f2 = this.isMoving ? Math.cos(walkCycle)*4 : 0;
-        ctx.fillStyle = '#222';
-        ctx.beginPath(); ctx.arc(-6 + (this.facingLeft ? f1 : f2), this.radius - 2, 4, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(6 + (this.facingLeft ? f2 : f1), this.radius - 2, 4, 0, Math.PI*2); ctx.fill();
-
-        ctx.scale(this.facingLeft ? -1 : 1, 1);
+        ctx.save(); ctx.translate(this.x, this.y); ctx.scale(this.facingLeft ? -1 : 1, 1);
         if (this.flashTimer > 0) ctx.globalAlpha = 0.5;
         if (this.type === 'ghost') {
             let d = distance(this.x, this.y, game.player.x, game.player.y);
@@ -1892,12 +1745,6 @@ class Enemy {
         let sc = this.type === 'boss' ? this.radius*3 : this.radius*2.5;
         if (this.isMoving) ctx.translate(0, -Math.abs(Math.sin(time / 100)) * 4);
         if(window.renderedSprites[spriteName]) ctx.drawImage(window.renderedSprites[spriteName], -sc/2, -sc/2, sc, sc);
-        
-        let h1 = this.isMoving ? Math.sin(walkCycle)*3 : 0;
-        ctx.fillStyle = '#555';
-        ctx.beginPath(); ctx.arc(-this.radius + 4, 2 + h1, 3, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(this.radius - 4, 2 - h1, 3, 0, Math.PI*2); ctx.fill();
-
         ctx.restore();
         if(this.eType === 'shielded') {
             ctx.strokeStyle = '#0088ff'; ctx.lineWidth = 4; ctx.beginPath();
